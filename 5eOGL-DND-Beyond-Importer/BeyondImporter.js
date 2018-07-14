@@ -1,5 +1,5 @@
 /*
- * Version 0.2.7
+ * Version 0.2.6
  *
  * Made By Robin Kuiper
  * Skype: RobinKuiper.eu
@@ -375,7 +375,7 @@
                         // Race Features
                         if(character.race.racialTraits != null) {
                             character.race.racialTraits.forEach(function(trait) {
-                                if(['Languages', 'Skills', 'Ability Score Increase', 'Feat', 'Age', 'Alignment', 'Size', 'Speed', 'Skill Versatility', 'Dwarven Combat Training', 'Keen Senses', 'Elf Weapon Training', 'Extra Language', 'Tool Proficiency'].indexOf(trait.definition.name) !== -1) {
+                                if(['Languages', 'Darkvision', 'Superior Darkvision', 'Skills', 'Ability Score Increase', 'Feat', 'Age', 'Alignment', 'Size', 'Speed', 'Skill Versatility', 'Dwarven Combat Training', 'Keen Senses', 'Elf Weapon Training', 'Extra Language', 'Tool Proficiency'].indexOf(trait.definition.name) !== -1) {
                                     return;
                                 }
 
@@ -441,10 +441,6 @@
                                     }
 
                                     var description = '';
-                                    /*trait.options.forEach(function(option) {
-                                     description += option.name + '\n';
-                                     description += (option.description !== '') ? option.description + '\n\n' : '\n';
-                                     });*/
 
                                     description += trait.description;
 
@@ -453,14 +449,34 @@
                                         description: replaceChars(description),
                                         source: 'Class',
                                         source_type: current_class.definition.name
-                                    }
+                                    };
 
                                     createRepeatingTrait(object, t);
+
+                                    if(trait.name == 'Metamagic') {
+                                        character.choices.class.forEach(function(option) {
+                                            if(option.type == 3 && (option.optionValue >= 106 && option.optionValue <= 113)) {
+                                                var item = getObjects(option.options, 'id', option.optionValue);
+
+                                                if(item.length > 0) {
+                                                    item = item[0];
+                                                    var o = {
+                                                        name: item.label,
+                                                        description: item.description,
+                                                        source: 'Class',
+                                                        source_type: current_class.definition.name
+                                                    };
+
+                                                    createRepeatingTrait(object, o);
+                                                }
+                                            }
+                                        });
+                                    }
                                 });
 
                                 if(current_class.subclassDefinition != null) {
                                     current_class.subclassDefinition.classFeatures.forEach(function(trait) {
-                                        if(['Spellcasting', 'Divine Domain', 'Ability Score Improvement', 'Bonus Cantrip', 'Proficiencies', 'Hit Points', 'Arcane Tradition', 'Otherworldly Patron', 'Pact Magic', 'Expanded Spell List', 'Ranger Archetype', 'Druidic', 'Druid Circle', 'Sorcerous Origin', 'Monastic Tradition', 'Bardic College', 'Expertise', 'Roguish Archetype', 'Sacred Oath', 'Oath Spells', 'Martial Archetype'].indexOf(trait.name) !== -1) {
+                                        if(['Spellcasting', 'Bonus Proficiency', 'Divine Domain', 'Ability Score Improvement', 'Bonus Cantrip', 'Proficiencies', 'Hit Points', 'Arcane Tradition', 'Otherworldly Patron', 'Pact Magic', 'Expanded Spell List', 'Ranger Archetype', 'Druidic', 'Druid Circle', 'Sorcerous Origin', 'Monastic Tradition', 'Bardic College', 'Expertise', 'Roguish Archetype', 'Sacred Oath', 'Oath Spells', 'Martial Archetype'].indexOf(trait.name) !== -1) {
                                             return;
                                         }
                                         if(trait.requiredLevel > current_class.level) return;
@@ -487,6 +503,8 @@
                                         createRepeatingTrait(object, t);
                                     });
                                 }
+
+
                             }
 
                             // Class Spells
