@@ -1,5 +1,5 @@
 /*
- * Version 0.2.8
+ * Version 0.2.9
  *
  * Made By Robin Kuiper
  * Skype: RobinKuiper.eu
@@ -359,7 +359,6 @@
 
                             createRepeatingTrait(object, btrait);
                         }
-
                         // Feats
                         character.feats.forEach(function(feat) {
                             var t = {
@@ -371,7 +370,6 @@
 
                             createRepeatingTrait(object, t);
                         });
-
                         // Race Features
                         if(character.race.racialTraits != null) {
                             character.race.racialTraits.forEach(function(trait) {
@@ -397,6 +395,12 @@
                                 };
 
                                 createRepeatingTrait(object, t);
+
+                                var spells = getFeatureSpells(character, trait.id, 'race');
+                                spells.forEach(function(spell) {
+                                    spell.spellCastingAbility = _ABILITIES[spell.spellCastingAbilityId];
+                                    class_spells.push(spell);
+                                });
                             });
                         }
                     }
@@ -405,8 +409,7 @@
                     var multiclass_level = 0;
                     var total_level = 0;
                     if(state[state_name].config.imports.classes){
-                        var i = 0;
-                        character.classes.forEach(function(current_class) {
+                        character.classes.forEach(function(current_class, i) {
                             total_level += current_class.level;
 
                             if(!current_class.isStartingClass){
@@ -452,6 +455,12 @@
                                     };
 
                                     createRepeatingTrait(object, t);
+
+                                    var spells = getFeatureSpells(character, trait.id, 'class');
+                                    spells.forEach(function(spell) {
+                                        spell.spellCastingAbility = _ABILITIES[spell.spellCastingAbilityId];
+                                        class_spells.push(spell);
+                                    });
 
                                     if(trait.name == 'Metamagic') {
                                         character.choices.class.forEach(function(option) {
@@ -501,15 +510,18 @@
                                         }
 
                                         createRepeatingTrait(object, t);
+
+                                        var spells = getFeatureSpells(character, trait.id, 'class');
+                                        spells.forEach(function(spell) {
+                                            spell.spellCastingAbility = _ABILITIES[spell.spellCastingAbilityId];
+                                            class_spells.push(spell);
+                                        });
                                     });
                                 }
-
-
                             }
 
                             // Class Spells
                             if(state[state_name].config.imports.class_spells){
-                                //class_spells = class_spells.concat(current_class.spells);
                                 for(var i in character.classSpells) {
                                     var spells = character.classSpells[i];
                                     if(character.classSpells[i].characterClassId == current_class.id) {
@@ -520,8 +532,14 @@
                                     }
                                 }
                             }
+                        });
+                    }
 
-                            i++;
+                    if(character.spells.race.length > 0) {
+                        var spells = character.spells.race;
+                        spells.forEach(function(spell) {
+                            spell.spellCastingAbility = _ABILITIES[spell.spellCastingAbilityId];
+                            class_spells.push(spell);
                         });
                     }
 
@@ -651,7 +669,7 @@
                         'global_attack_mod_flag': 1,
                         'global_damage_mod_flag': 1,
                         'dtype': 'full',
-
+                        'init_tiebreaker': '@{dexterity}/100',
                         'jack_of_all_trades': jack
                     };
 
@@ -707,6 +725,21 @@
                 break;
         }
         return 0;
+    };
+
+    const getFeatureSpells = function(character, traitId, featureType) {
+        var spellsArr = [];
+        if(character.spells[featureType] == null) return spellsArr;
+        if(character.spells[featureType].length > 0) {
+            var options = getObjects(character.options[featureType], 'componentId', traitId);
+            for(var i = 0; i < options.length; i++) {
+                var spells = getObjects(character.spells[featureType], 'componentId', options[i].definition.id);
+                for(var j = 0; j < spells.length; j++) {
+                    spellsArr.push(spells[j])
+                }
+            }
+        }
+        return spellsArr;
     };
 
     const importSpells = function(array) {
