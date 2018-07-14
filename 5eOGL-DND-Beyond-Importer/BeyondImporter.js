@@ -1,5 +1,5 @@
 /*
- * Version 0.2.6
+ * Version 0.2.7
  *
  * Made By Robin Kuiper
  * Skype: RobinKuiper.eu
@@ -113,55 +113,67 @@
                     var weightSpeeds = character.race.weightSpeeds;
 
                     var speedMods = getObjects(character, 'subType', 'speed');
-                    speedMods.forEach(function(speedMod) {
-                        if(speedMod.type == 'set') {
-                            weightSpeeds.normal.walk = (speedMod.value > weightSpeeds.normal.walk ? speedMod.value : weightSpeeds.normal.walk);
-                        }
-                    });
+                    if(speedMods != null) {
+                        speedMods.forEach(function(speedMod) {
+                            if(speedMod.type == 'set') {
+                                weightSpeeds.normal.walk = (speedMod.value > weightSpeeds.normal.walk ? speedMod.value : weightSpeeds.normal.walk);
+                            }
+                        });
+                    }
 
                     speedMods = getObjects(character, 'subType', 'innate-speed-flying');
-                    speedMods.forEach(function(speedMod) {
-                        if(speedMod.type == 'set' && speedMod.id.indexOf('spell') == -1) {
-                            if(speedMod.value == null) speedMod.value = weightSpeeds.normal.walk;
-                            weightSpeeds.normal.fly = (speedMod.value > weightSpeeds.normal.fly ? speedMod.value : weightSpeeds.normal.fly);
-                        }
-                    });
+                    if(speedMods != null) {
+                        speedMods.forEach(function(speedMod) {
+                            if(speedMod.type == 'set' && speedMod.id.indexOf('spell') == -1) {
+                                if(speedMod.value == null) speedMod.value = weightSpeeds.normal.walk;
+                                weightSpeeds.normal.fly = (speedMod.value > weightSpeeds.normal.fly ? speedMod.value : weightSpeeds.normal.fly);
+                            }
+                        });
+                    }
 
                     speedMods = getObjects(character, 'subType', 'innate-speed-swimming');
-                    speedMods.forEach(function(speedMod) {
-                        if(speedMod.type == 'set' && speedMod.id.indexOf('spell') == -1) {
-                            if(speedMod.value == null) speedMod.value = weightSpeeds.normal.walk;
-                            weightSpeeds.normal.swim = (speedMod.value > weightSpeeds.normal.swim ? speedMod.value : weightSpeeds.normal.swim);
-                        }
-                    });
+                    if(speedMods != null) {
+                        speedMods.forEach(function(speedMod) {
+                            if(speedMod.type == 'set' && speedMod.id.indexOf('spell') == -1) {
+                                if(speedMod.value == null) speedMod.value = weightSpeeds.normal.walk;
+                                weightSpeeds.normal.swim = (speedMod.value > weightSpeeds.normal.swim ? speedMod.value : weightSpeeds.normal.swim);
+                            }
+                        });
+                    }
 
                     speedMods = getObjects(character, 'subType', 'innate-speed-climbing');
-                    speedMods.forEach(function(speedMod) {
-                        if(speedMod.type == 'set' && speedMod.id.indexOf('spell') == -1) {
-                            if(speedMod.value == null) speedMod.value = weightSpeeds.normal.walk;
-                            weightSpeeds.normal.climb = (speedMod.value > weightSpeeds.normal.climb ? speedMod.value : weightSpeeds.normal.climb);
-                        }
-                    });
+                    if(speedMods != null) {
+                        speedMods.forEach(function(speedMod) {
+                            if(speedMod.type == 'set' && speedMod.id.indexOf('spell') == -1) {
+                                if(speedMod.value == null) speedMod.value = weightSpeeds.normal.walk;
+                                weightSpeeds.normal.climb = (speedMod.value > weightSpeeds.normal.climb ? speedMod.value : weightSpeeds.normal.climb);
+                            }
+                        });
+                    }
 
                     speedMods = getObjects(character, 'subType', 'unarmored-movement');
-                    speedMods.forEach(function(speedMod) {
-                        if(speedMod.type == 'bonus') {
-                            weightSpeeds.normal.walk += speedMod.value;
-                            if(weightSpeeds.normal.fly > 0) weightSpeeds.normal.fly += speedMod.value;
-                            if(weightSpeeds.normal.swim > 0) weightSpeeds.normal.swim += speedMod.value;
-                            if(weightSpeeds.normal.climb > 0) weightSpeeds.normal.climb += speedMod.value;
-                        }
-                    });
+                    if(speedMods != null) {
+                        speedMods.forEach(function(speedMod) {
+                            if(speedMod.type == 'bonus') {
+                                weightSpeeds.normal.walk += speedMod.value;
+                                if(weightSpeeds.normal.fly > 0) weightSpeeds.normal.fly += speedMod.value;
+                                if(weightSpeeds.normal.swim > 0) weightSpeeds.normal.swim += speedMod.value;
+                                if(weightSpeeds.normal.climb > 0) weightSpeeds.normal.climb += speedMod.value;
+                            }
+                        });
+                    }
 
                     speedMods = getObjects(character, 'subType', 'speed');
-                    speedMods.forEach(function(speedMod) {
-                        if(speedMod.type == 'bonus') {
-                            weightSpeeds.normal.walk += speedMod.value;
-                            if(weightSpeeds.normal.fly > 0) weightSpeeds.normal.fly += speedMod.value;
-                            if(weightSpeeds.normal.swim > 0) weightSpeeds.normal.swim += speedMod.value;
-                            if(weightSpeeds.normal.climb > 0) weightSpeeds.normal.climb += speedMod.value;
-                        }
-                    });
+                    if(speedMods != null) {
+                        speedMods.forEach(function(speedMod) {
+                            if(speedMod.type == 'bonus') {
+                                weightSpeeds.normal.walk += speedMod.value;
+                                if(weightSpeeds.normal.fly > 0) weightSpeeds.normal.fly += speedMod.value;
+                                if(weightSpeeds.normal.swim > 0) weightSpeeds.normal.swim += speedMod.value;
+                                if(weightSpeeds.normal.climb > 0) weightSpeeds.normal.climb += speedMod.value;
+                            }
+                        });
+                    }
 
                     var speed = weightSpeeds.normal.walk + 'ft.';
                     for(var key in weightSpeeds.normal){
@@ -174,10 +186,10 @@
                     var hasArmor = false;
                     if(state[state_name].config.imports.inventory){
                         const inventory = character.inventory;
-                        inventory.forEach(function(item) {
+                        if(inventory != null) inventory.forEach(function(item) {
                             var row = generateRowID();
 
-                            var attributes = {}
+                            var attributes = {};
                             attributes["repeating_inventory_"+row+"_itemname"] = item.definition.name;
                             attributes["repeating_inventory_"+row+"_equipped"] = (item.equipped) ? '1' : '0';
                             attributes["repeating_inventory_"+row+"_itemcount"] = item.quantity;
@@ -199,11 +211,11 @@
                                         item.definition.armorClass += grantedMod.value;
                                     }
                                     else {
-                                        _itemmodifiers += ', AC: ' + grantedMod.value;
+                                        _itemmodifiers += ', AC +' + grantedMod.value;
                                     }
                                 }
                                 if(grantedMod.type == 'bonus' && (grantedMod.subType == 'saving-throws')) {
-                                    _itemmodifiers += ', Saving Throws: ' + grantedMod.value;
+                                    _itemmodifiers += ', Saving Throws +' + grantedMod.value;
                                 }
                             });
                             if(item.definition.hasOwnProperty('armorClass')){
@@ -265,7 +277,7 @@
 
                     // If character has unarmored defense, add it to the inventory, so a player can enable/disable it.
                     var unarmored = getObjects(character, 'subType', 'unarmored-armor-class');
-                    unarmored.forEach(function(ua) {
+                    if(unarmored != null) unarmored.forEach(function(ua) {
                         if(ua.type != 'set') return;
                         if(ua.value == null) {
                             ua.value = Math.floor((getTotalAbilityScore(character, ua.statId) - 10) / 2);
@@ -284,9 +296,11 @@
                     if(state[state_name].config.imports.languages){
                         var languages = getObjects(character, 'type', 'language');
                         var langs = [];
-                        languages.forEach(function(language) {
-                            langs.push(language.friendlySubtypeName);
-                        });
+                        if(languages != null) {
+                            languages.forEach(function(language) {
+                                langs.push(language.friendlySubtypeName);
+                            });
+                        }
 
                         var row = generateRowID();
 
@@ -302,22 +316,24 @@
                     if(state[state_name].config.imports.proficiencies){
                         const weapons = ['Club', 'Dagger', 'Greatclub', 'Handaxe', 'Javelin', 'Light hammer', 'Mace', 'Quarterstaff', 'Sickle', 'Spear', 'Crossbow, Light', 'Dart', 'Shortbow', 'Sling', 'Battleaxe', 'Flail', 'Glaive', 'Greataxe', 'Greatsword', 'Halberd', 'Lance', 'Longsword', 'Maul', 'Morningstar', 'Pike', 'Rapier', 'Scimitar', 'Shortsword', 'Trident', 'War pick', 'Warhammer', 'Whip', 'Blowgun', 'Crossbow, Hand', 'Crossbow, Heavy', 'Longbow', 'Net'];
                         var proficiencies = getObjects(character, 'type', 'proficiency');
-                        proficiencies.forEach(function(prof) {
-                            var row = generateRowID();
+                        if(proficiencies != null) {
+                            proficiencies.forEach(function(prof) {
+                                var row = generateRowID();
 
-                            var attributes = {}
-                            attributes["repeating_proficiencies_"+row+"_name"] = prof.friendlySubtypeName;
-                            attributes["repeating_proficiencies_"+row+"_prof_type"] = (prof.subType.includes('weapon') || weapons.includes(prof.friendlySubtypeName)) ? 'WEAPON' : (prof.subType.includes('armor') || prof.subType.includes('shield')) ? 'ARMOR' : 'OTHER';
+                                var attributes = {}
+                                attributes["repeating_proficiencies_"+row+"_name"] = prof.friendlySubtypeName;
+                                attributes["repeating_proficiencies_"+row+"_prof_type"] = (prof.subType.includes('weapon') || weapons.includes(prof.friendlySubtypeName)) ? 'WEAPON' : (prof.subType.includes('armor') || prof.subType.includes('shield')) ? 'ARMOR' : 'OTHER';
 
-                            var skill = prof.subType.replace(/-/g, '_');
-                            if(skills.includes(skill)){
-                                attributes[skill + '_prof'] = '(@{pb}*@{'+skill+'_type})';
-                            }
+                                var skill = prof.subType.replace(/-/g, '_');
+                                if(skills.includes(skill)){
+                                    attributes[skill + '_prof'] = '(@{pb}*@{'+skill+'_type})';
+                                }
 
-                            attributes["repeating_proficiencies_"+row+"_options-flag"] = '0';
+                                attributes["repeating_proficiencies_"+row+"_options-flag"] = '0';
 
-                            setAttrs(object.id, attributes);
-                        });
+                                setAttrs(object.id, attributes);
+                            });
+                        }
                     }
 
                     if(state[state_name].config.imports.traits) {
@@ -357,28 +373,32 @@
                         });
 
                         // Race Features
-                        character.race.racialTraits.forEach(function(trait) {
-                            if(['Languages', 'Skills', 'Ability Score Increase', 'Feat', 'Age', 'Alignment', 'Size', 'Speed', 'Skill Versatility', 'Dwarven Combat Training', 'Keen Senses', 'Elf Weapon Training', 'Extra Language', 'Tool Proficiency'].indexOf(trait.definition.name) !== -1) {
-                                return;
-                            }
+                        if(character.race.racialTraits != null) {
+                            character.race.racialTraits.forEach(function(trait) {
+                                if(['Languages', 'Skills', 'Ability Score Increase', 'Feat', 'Age', 'Alignment', 'Size', 'Speed', 'Skill Versatility', 'Dwarven Combat Training', 'Keen Senses', 'Elf Weapon Training', 'Extra Language', 'Tool Proficiency'].indexOf(trait.definition.name) !== -1) {
+                                    return;
+                                }
 
-                            var description = '';
-                            trait.options.forEach(function(option) {
-                                description += option.name + '\n';
-                                description += (option.description !== '') ? option.description + '\n\n' : '\n';
+                                var description = '';
+                                if(trait.options != null) {
+                                    trait.options.forEach(function(option) {
+                                        description += option.name + '\n';
+                                        description += (option.description !== '') ? option.description + '\n\n' : '\n';
+                                    });
+                                }
+
+                                description += trait.definition.description;
+
+                                var t = {
+                                    name: trait.definition.name,
+                                    description: replaceChars(description),
+                                    source: 'Race',
+                                    source_type: character.race.fullName
+                                };
+
+                                createRepeatingTrait(object, t);
                             });
-
-                            description += trait.definition.description;
-
-                            var t = {
-                                name: trait.definition.name,
-                                description: replaceChars(description),
-                                source: 'Race',
-                                source_type: character.race
-                            };
-
-                            createRepeatingTrait(object, t);
-                        });
+                        }
                     }
 
                     // Handle (Multi)Class Features
