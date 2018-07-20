@@ -1,5 +1,5 @@
 /*
- * Version 0.2.9
+ * Version 0.2.10
  *
  * Made By Robin Kuiper
  * Skype: RobinKuiper.eu
@@ -20,7 +20,6 @@
 (function() {
     const _ABILITIES = {1:'STR',2:'DEX',3:'CON',4:'INT',5:'WIS',6:'CHA'};
     const _ABILITY = {'STR': 'strength', 'DEX': 'dexterity', 'CON': 'constitution', 'INT': 'intelligence', 'WIS': 'wisdom', 'CHA': 'charisma'}
-    const _ABILITYCAP = {'STR': 'Strength', 'DEX': 'Dexterity', 'CON': 'Constitution', 'INT': 'Intelligence', 'WIS': 'Wisdom', 'CHA': 'Charisma'}
 
     const skills = ['acrobatics', 'animal_handling', 'arcana', 'athletics', 'deception', 'history', 'insight', 'intimidation', 'investigation', 'medicine', 'nature', 'perception', 'performance', 'persuasion', 'religion', 'sleight_of_hand', 'stealth', 'survival']
 
@@ -200,7 +199,7 @@
                                 for(var abilityId in _ABILITIES) {
                                     var ABL = _ABILITIES[abilityId];
                                     if(grantedMod.type == 'set' && grantedMod.subType == _ABILITY[ABL]+'-score') {
-                                        _itemmodifiers += ', '+_ABILITYCAP[ABL]+': '+grantedMod.value;
+                                        _itemmodifiers += ', '+ucFirst(_ABILITY[ABL])+': '+grantedMod.value;
                                     }
                                 }
                                 if(grantedMod.type == 'bonus' && (grantedMod.subType == 'unarmored-armor-class' || grantedMod.subType == 'armor-class')) {
@@ -676,7 +675,7 @@
                     setAttrs(object.id, Object.assign(other_attributes, bonus_attributes));
 
                     if(state[state_name].config.imports.class_spells || true){
-                        importSpells(class_spells);
+                        importSpells(character, class_spells);
                     }
 
                     var hp = Math.floor(character.baseHitPoints + ( total_level * Math.floor( ( ( getTotalAbilityScore(character, 3) - 10 ) / 2 ) ) ) );
@@ -742,14 +741,14 @@
         return spellsArr;
     };
 
-    const importSpells = function(array) {
+    const importSpells = function(character, array) {
         // set this to whatever number of items you can process at once
         var chunk = 10;
         var index = 0;
         function doChunk() {
             var cnt = chunk;
             while (cnt-- && index < array.length) {
-                importSpell(array[index]);
+                importSpell(character, array[index]);
                 ++index;
             }
             if (index < array.length) {
@@ -760,7 +759,7 @@
         doChunk();
     };
 
-    const importSpell = function(spell) {
+    const importSpell = function(character, spell) {
         var level = (spell.definition.level === 0) ? 'cantrip' : spell.definition.level.toString();
         var row = generateRowID();
 
@@ -798,6 +797,44 @@
         attributes["repeating_spell-"+level+"_"+row+"_spellcomp_s"] = (components.includes(2)) ? '{{s=1}}' : '0';
         attributes["repeating_spell-"+level+"_"+row+"_spellcomp_m"] = (components.includes(3)) ? '{{m=1}}' : '0';
         attributes["repeating_spell-"+level+"_"+row+"_spellcomp_materials"] = (components.includes(3)) ? replaceChars(spell.definition.componentsDescription) : '';
+        
+        var healing = getObjects(spell, 'subType', 'hit-points');
+        if(healing.length !== 0) {
+            healing = healing[0];
+            if(healing.type == 'bonus') {
+                var bonus = '';
+                if(getObjects(character.classes, 'name', 'Disciple of Life').length > 0) {
+                    bonus = '+3';
+                }
+                
+                attributes["repeating_spell-"+level+"_"+row+"_spellattack"] = 'None';
+                attributes["repeating_spell-"+level+"_"+row+"_spellsave"] = '';
+                attributes["repeating_spell-"+level+"_"+row+"_spelldamage"] = '';
+                attributes["repeating_spell-"+level+"_"+row+"_spelldamagetype"] = '';
+                attributes["repeating_spell-"+level+"_"+row+"_spellhealing"] = (healing.die.fixedValue !== null) ? healing.die.fixedValue+bonus : healing.die.diceString+bonus;
+                attributes["repeating_spell-"+level+"_"+row+"_spelldmgmod"] = healing.usePrimaryStat ? 'Yes' : '0';
+                
+                var bonus = '';
+                if(getObjects(character.classes, 'name', 'Disciple of Life').length > 0) {
+                    bonus = '1';
+                }
+                
+                var ahl = spell.definition.atHigherLevels.higherLevelDefinitions;
+                for(var i in ahl) {
+                    if(ahl[i].dice == null) continue;
+                    attributes["repeating_spell-"+level+"_"+row+"_spellhldie"] = ahl[i].dice.diceCount;
+                    attributes["repeating_spell-"+level+"_"+row+"_spellhldietype"] = 'd'+ahl[i].dice.diceValue;
+                    attributes["repeating_spell-"+level+"_"+row+"_spellhlbonus"] = bonus;
+                }
+                
+                if(healing.hasOwnProperty('atHigherLevels') && healing.atHigherLevels.scaleType === 'spellscale') {
+                    attributes["repeating_spell-"+level+"_"+row+"_spellhldie"] = '1';
+                    attributes["repeating_spell-"+level+"_"+row+"_spellhldietype"] = 'd'+healing.die.diceValue;
+                    attributes["repeating_spell-"+level+"_"+row+"_spellhlbonus"] = bonus;
+                }
+                attributes["repeating_spell-"+level+"_"+row+"_spelloutput"] = 'ATTACK';
+            }
+        }
 
         // Damage/Attack
         var damage = getObjects(spell, 'type', 'damage');
@@ -807,7 +844,7 @@
             if(spell.definition.attackType == 1) spell.definition.attackType = 'melee';
             if(spell.definition.attackType == 2) spell.definition.attackType = 'ranged';
             attributes["repeating_spell-"+level+"_"+row+"_spellattack"] = (spell.definition.attackType === '') ? 'None' : spell.definition.attackType;
-            attributes["repeating_spell-"+level+"_"+row+"_spellsave"] = (spell.definition.saveDcAbilityId === null) ? 'NONE' : ucFirst(_ABILITY[_ABILITIES[spell.definition.saveDcAbilityId]]);
+            attributes["repeating_spell-"+level+"_"+row+"_spellsave"] = (spell.definition.saveDcAbilityId === null) ? '' : ucFirst(_ABILITY[_ABILITIES[spell.definition.saveDcAbilityId]]);
             attributes["repeating_spell-"+level+"_"+row+"_spelldamage"] = (damage.die.fixedValue !== null) ? damage.die.fixedValue : damage.die.diceString;
             attributes["repeating_spell-"+level+"_"+row+"_spelldamagetype"] = damage.friendlySubtypeName;
 
@@ -818,41 +855,41 @@
                 attributes["repeating_spell-"+level+"_"+row+"_spellhldietype"] = 'd'+ahl[i].dice.diceValue;
             }
 
-            /*//if(spell.definition.requiresAttackRoll) attributes["repeating_spell-"+level+"_"+row+"_spelldmgmod"] = 'yes';
+            //if(spell.definition.requiresAttackRoll) attributes["repeating_spell-"+level+"_"+row+"_spelldmgmod"] = 'yes';
 
              // FOR SPELLS WITH MULTIPLE DAMAGE OUTPUTS
              //attributes["repeating_spell-"+level+"_"+row+"_spelldamage2"] = damage.die.diceString;
              //attributes["repeating_spell-"+level+"_"+row+"_spelldamagetype2"] = damage.friendlySubtypeName;
 
              // CREATE ATTACK
-             /!*var attack = {
-             name: spell.definition.name,
-             range: (spell.definition.range.origin === 'Ranged') ? spell.definition.range.rangeValue + 'ft.' : spell.definition.range.origin,
-             attack: {
-             attribute: _ABILITY[spell.spellCastingAbility] //_ABILITY[current_class.class.spellCastingAbility]
-             },
-             damage: {
-             diceString: (damage.die.fixedValue !== null) ? damage.die.fixedValue : damage.die.diceString,
-             type: damage.friendlySubtypeName,
-             attribute: '0'
-             },
-             description: replaceChars(spell.definition.description)
+             var attack = {
+                 name: spell.definition.name,
+                 range: (spell.definition.range.origin === 'Ranged') ? spell.definition.range.rangeValue + 'ft.' : spell.definition.range.origin,
+                 attack: {
+                    attribute: _ABILITY[spell.spellCastingAbility] //_ABILITY[current_class.class.spellCastingAbility]
+                 },
+                 damage: {
+                     diceString: (damage.die.fixedValue !== null) ? damage.die.fixedValue : damage.die.diceString,
+                     type: damage.friendlySubtypeName,
+                     attribute: '0'
+                 },
+                 description: replaceChars(spell.definition.description)
              }
 
-             var attackid = createRepeatingAttack(object, attack);
-             attributes["repeating_spell-"+level+"_"+row+"_rollcontent"] = '%{'+object.id+'|repeating_attack_'+attackid+'_attack}';*!/
+             //var attackid = createRepeatingAttack(object, attack);
+             //attributes["repeating_spell-"+level+"_"+row+"_rollcontent"] = '%{'+object.id+'|repeating_attack_'+attackid+'_attack}';
              // /CREATE ATTACK
 
              if(damage.hasOwnProperty('atHigherLevels') && damage.atHigherLevels.scaleType === 'spellscale'){
-             attributes["repeating_spell-"+level+"_"+row+"_spellhldie"] = '1';
-             attributes["repeating_spell-"+level+"_"+row+"_spellhldietype"] = 'd'+damage.die.diceValue;
-             }*/
+                attributes["repeating_spell-"+level+"_"+row+"_spellhldie"] = '1';
+                attributes["repeating_spell-"+level+"_"+row+"_spellhldietype"] = 'd'+damage.die.diceValue;
+             }
 
-            /*//var newrowid = generateRowID();
-             //attributes["repeating_spell-"+level+"_"+row+"_spellattackid"] = newrowid;
-             //attributes["repeating_spell-"+level+"_"+row+"_rollcontent"] = "%{" + object.id + "|repeating_attack_" + newrowid + "_attack}";*/
+            // var newrowid = generateRowID();
+            // attributes["repeating_spell-"+level+"_"+row+"_spellattackid"] = newrowid;
+            // attributes["repeating_spell-"+level+"_"+row+"_rollcontent"] = "%{" + object.id + "|repeating_attack_" + newrowid + "_attack}";
 
-            // attributes["repeating_spell-"+level+"_"+row+"_spelloutput"] = 'ATTACK';
+            attributes["repeating_spell-"+level+"_"+row+"_spelloutput"] = 'ATTACK';
         }
 
         setAttrs(object.id, attributes);
