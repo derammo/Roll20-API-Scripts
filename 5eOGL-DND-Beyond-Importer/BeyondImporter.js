@@ -804,7 +804,7 @@
             if(healing.type == 'bonus') {
                 var bonus = '';
                 if(getObjects(character.classes, 'name', 'Disciple of Life').length > 0) {
-                    bonus = '+3';
+                    bonus = '+'+(2 + spell.definition.level);
                 }
                 
                 attributes["repeating_spell-"+level+"_"+row+"_spellattack"] = 'None';
