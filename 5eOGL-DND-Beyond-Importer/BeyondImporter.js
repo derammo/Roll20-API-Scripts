@@ -1,5 +1,5 @@
 /*
- * Version 0.2.10
+ * Version 0.2.11
  *
  * Made By Robin Kuiper
  * Skype: RobinKuiper.eu
@@ -226,12 +226,11 @@
                                 var finesse = false;
                                 for(var j = 0; j < item.definition.properties.length; j++){
                                     properties += item.definition.properties[j].name + ', ';
-
                                     //if(item.definition.properties[j].name === 'Finesse'){ finesse = true }
                                 }
                                 attributes["repeating_inventory_"+row+"_itemproperties"] = properties;
                                 attributes["repeating_inventory_"+row+"_hasattack"] = '0';
-                                _itemmodifiers = 'Item Type: ' + item.definition.attackType + ' ' + item.definition.filterType + ', Damage: ' + item.definition.damage.diceString + ', Damage Type: ' + item.definition.damageType + ', Range: ' + item.definition.range + '/' + item.definition.longRange;
+                                _itemmodifiers = 'Item Type: ' + item.definition.attackType + ' ' + item.definition.filterType + (item.definition.damage != null ? ', Damage: ' + item.definition.damage.diceString : '') + ', Damage Type: ' + item.definition.damageType + ', Range: ' + item.definition.range + '/' + item.definition.longRange;
 
                                 var magic = 0;
                                 item.definition.grantedModifiers.forEach(function(grantedMod) {
@@ -248,7 +247,7 @@
                                         attribute: _ABILITY[_ABILITIES[item.definition.attackType]]
                                     },
                                     damage: {
-                                        diceString: item.definition.damage.diceString,
+                                        diceString: item.definition.damage != null ? item.definition.damage.diceString : '',
                                         type: item.definition.damageType,
                                         attribute: _ABILITY[_ABILITIES[item.definition.attackType]]
                                     },
@@ -258,11 +257,13 @@
 
                                 item.definition.grantedModifiers.forEach(function(grantedMod) {
                                     if(grantedMod.type == 'damage') {
-                                        attack.damage2 = {
-                                            diceString: grantedMod.dice.diceString,
-                                            type: grantedMod.friendlySubtypeName,
-                                            attribute: grantedMod.statId == null ? '0' : _ABILITY[_ABILITIES[grantedMod.statId]]
-                                        };
+                                        if(grantedMod.dice != null) {
+                                            attack.damage2 = {
+                                                diceString: grantedMod.dice.diceString,
+                                                type: grantedMod.friendlySubtypeName,
+                                                attribute: grantedMod.statId == null ? '0' : _ABILITY[_ABILITIES[grantedMod.statId]]
+                                            };
+                                        }
                                     }
                                 });
 
@@ -797,7 +798,7 @@
         attributes["repeating_spell-"+level+"_"+row+"_spellcomp_s"] = (components.includes(2)) ? '{{s=1}}' : '0';
         attributes["repeating_spell-"+level+"_"+row+"_spellcomp_m"] = (components.includes(3)) ? '{{m=1}}' : '0';
         attributes["repeating_spell-"+level+"_"+row+"_spellcomp_materials"] = (components.includes(3)) ? replaceChars(spell.definition.componentsDescription) : '';
-        
+
         var healing = getObjects(spell, 'subType', 'hit-points');
         if(healing.length !== 0) {
             healing = healing[0];
@@ -806,19 +807,19 @@
                 if(getObjects(character.classes, 'name', 'Disciple of Life').length > 0) {
                     bonus = '+'+(2 + spell.definition.level);
                 }
-                
+
                 attributes["repeating_spell-"+level+"_"+row+"_spellattack"] = 'None';
                 attributes["repeating_spell-"+level+"_"+row+"_spellsave"] = '';
                 attributes["repeating_spell-"+level+"_"+row+"_spelldamage"] = '';
                 attributes["repeating_spell-"+level+"_"+row+"_spelldamagetype"] = '';
                 attributes["repeating_spell-"+level+"_"+row+"_spellhealing"] = (healing.die.fixedValue !== null) ? healing.die.fixedValue+bonus : healing.die.diceString+bonus;
                 attributes["repeating_spell-"+level+"_"+row+"_spelldmgmod"] = healing.usePrimaryStat ? 'Yes' : '0';
-                
+
                 var bonus = '';
                 if(getObjects(character.classes, 'name', 'Disciple of Life').length > 0) {
                     bonus = '1';
                 }
-                
+
                 var ahl = spell.definition.atHigherLevels.higherLevelDefinitions;
                 for(var i in ahl) {
                     if(ahl[i].dice == null) continue;
@@ -826,7 +827,7 @@
                     attributes["repeating_spell-"+level+"_"+row+"_spellhldietype"] = 'd'+ahl[i].dice.diceValue;
                     attributes["repeating_spell-"+level+"_"+row+"_spellhlbonus"] = bonus;
                 }
-                
+
                 if(healing.hasOwnProperty('atHigherLevels') && healing.atHigherLevels.scaleType === 'spellscale') {
                     attributes["repeating_spell-"+level+"_"+row+"_spellhldie"] = '1';
                     attributes["repeating_spell-"+level+"_"+row+"_spellhldietype"] = 'd'+healing.die.diceValue;
@@ -857,33 +858,33 @@
 
             //if(spell.definition.requiresAttackRoll) attributes["repeating_spell-"+level+"_"+row+"_spelldmgmod"] = 'yes';
 
-             // FOR SPELLS WITH MULTIPLE DAMAGE OUTPUTS
-             //attributes["repeating_spell-"+level+"_"+row+"_spelldamage2"] = damage.die.diceString;
-             //attributes["repeating_spell-"+level+"_"+row+"_spelldamagetype2"] = damage.friendlySubtypeName;
+            // FOR SPELLS WITH MULTIPLE DAMAGE OUTPUTS
+            //attributes["repeating_spell-"+level+"_"+row+"_spelldamage2"] = damage.die.diceString;
+            //attributes["repeating_spell-"+level+"_"+row+"_spelldamagetype2"] = damage.friendlySubtypeName;
 
-             // CREATE ATTACK
-             var attack = {
-                 name: spell.definition.name,
-                 range: (spell.definition.range.origin === 'Ranged') ? spell.definition.range.rangeValue + 'ft.' : spell.definition.range.origin,
-                 attack: {
+            // CREATE ATTACK
+            var attack = {
+                name: spell.definition.name,
+                range: (spell.definition.range.origin === 'Ranged') ? spell.definition.range.rangeValue + 'ft.' : spell.definition.range.origin,
+                attack: {
                     attribute: _ABILITY[spell.spellCastingAbility] //_ABILITY[current_class.class.spellCastingAbility]
-                 },
-                 damage: {
-                     diceString: (damage.die.fixedValue !== null) ? damage.die.fixedValue : damage.die.diceString,
-                     type: damage.friendlySubtypeName,
-                     attribute: '0'
-                 },
-                 description: replaceChars(spell.definition.description)
-             }
+                },
+                damage: {
+                    diceString: (damage.die.fixedValue !== null) ? damage.die.fixedValue : damage.die.diceString,
+                    type: damage.friendlySubtypeName,
+                    attribute: '0'
+                },
+                description: replaceChars(spell.definition.description)
+            }
 
-             //var attackid = createRepeatingAttack(object, attack);
-             //attributes["repeating_spell-"+level+"_"+row+"_rollcontent"] = '%{'+object.id+'|repeating_attack_'+attackid+'_attack}';
-             // /CREATE ATTACK
+            //var attackid = createRepeatingAttack(object, attack);
+            //attributes["repeating_spell-"+level+"_"+row+"_rollcontent"] = '%{'+object.id+'|repeating_attack_'+attackid+'_attack}';
+            // /CREATE ATTACK
 
-             if(damage.hasOwnProperty('atHigherLevels') && damage.atHigherLevels.scaleType === 'spellscale'){
+            if(damage.hasOwnProperty('atHigherLevels') && damage.atHigherLevels.scaleType === 'spellscale'){
                 attributes["repeating_spell-"+level+"_"+row+"_spellhldie"] = '1';
                 attributes["repeating_spell-"+level+"_"+row+"_spellhldietype"] = 'd'+damage.die.diceValue;
-             }
+            }
 
             // var newrowid = generateRowID();
             // attributes["repeating_spell-"+level+"_"+row+"_spellattackid"] = newrowid;
