@@ -1,5 +1,5 @@
 /*
- * Version 0.3.0
+ * Version 0.3.1
  *
  * Made By Robin Kuiper
  * Skype: RobinKuiper.eu
@@ -47,7 +47,7 @@
         // Split the message into command and argument(s)
         var args = msg.content.split(/ --(help|reset|config|imports|import) ?/g);
         var command = args.shift().substring(1).trim();
-
+        
         if (command == 'beyond') {
             var importData = '';
             if(args.length < 1) { sendHelpMenu(); return; }
@@ -922,10 +922,19 @@
         var prefixButton = makeButton(prefix, '!beyond --config prefix|?{Prefix}', buttonStyle);
         var overwriteButton = makeButton(state[state_name].config.overwrite, '!beyond --config overwrite|'+!state[state_name].config.overwrite, buttonStyle);
         var debugButton = makeButton(state[state_name].config.debug, '!beyond --config debug|'+!state[state_name].config.debug, buttonStyle);
+        
+        var players = '';
+        var playerObjects = findObjs({                              
+            _type: "player",
+        });
+        for(var i = 0; i < playerObjects.length; i++) {
+            players += '|'+playerObjects[i]['attributes']['_displayname']+','+playerObjects[i].id;
+        }
+        
         var ipj = state[state_name].config.inplayerjournals == '' ? '[NONE]' : state[state_name].config.inplayerjournals;
-        var inPlayerJournalsButton = makeButton(ipj, '!beyond --config inplayerjournals|?{Player|None,[NONE]|All Players,all}', buttonStyle);
+        var inPlayerJournalsButton = makeButton(ipj, '!beyond --config inplayerjournals|?{Player|None,[NONE]|All Players,all'+players+'}', buttonStyle);
         var cb = state[state_name].config.controlledby == '' ? '[NONE]' : state[state_name].config.controlledby;
-        var controlledByButton = makeButton(cb, '!beyond --config controlledby|?{Player|None,[NONE]|All Players,all}', buttonStyle);
+        var controlledByButton = makeButton(cb, '!beyond --config controlledby|?{Player|None,[NONE]|All Players,all'+players+'}', buttonStyle);
 
         var listItems = [
             '<span style="float: left; margin-top: 6px;">Overwrite:</span> '+overwriteButton,
