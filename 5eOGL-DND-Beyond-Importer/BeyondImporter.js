@@ -1,5 +1,5 @@
 /*
- * Version 0.3.1
+ * Version 0.3.2
  *
  * Made By Robin Kuiper
  * Skype: RobinKuiper.eu
@@ -47,11 +47,11 @@
         // Split the message into command and argument(s)
         var args = msg.content.split(/ --(help|reset|config|imports|import) ?/g);
         var command = args.shift().substring(1).trim();
-        
+
         if (command == 'beyond') {
             var importData = '';
             if(args.length < 1) { sendHelpMenu(); return; }
-            
+
             for(var i = 0; i < args.length; i+=2) {
                 var k = args[i].trim();
                 var v = args[i+1] != null ? args[i+1].trim() : null;
@@ -91,7 +91,7 @@
 
                         sendConfigMenu();
                         return;
-                        
+
                     case 'import':
                         importData = v;
                         break;
@@ -101,7 +101,7 @@
                         return;
                 }
             }
-            
+
             if(importData != '') {
                 var json = importData;
                 var character = JSON.parse(json).character;
@@ -121,7 +121,7 @@
                 }
 
                 // Create character object
-                object = createObj("character", { 
+                object = createObj("character", {
                     name: character.name + state[state_name].config.prefix,
                     inplayerjournals: state[state_name].config.inplayerjournals,
                     controlledby: state[state_name].config.controlledby
@@ -312,24 +312,41 @@
                 });
 
                 // Languages
-                if(state[state_name].config.imports.languages){
+                if(state[state_name].config.imports.languages) {
                     var languages = getObjects(character, 'type', 'language');
-                    var langs = [];
-                    if(languages != null) {
-                        languages.forEach(function(language) {
-                            langs.push(language.friendlySubtypeName);
-                        });
+                    if(state[state_name].config.languageGrouping) {
+                        var langs = [];
+                        if(languages != null) {
+                            languages.forEach(function(language) {
+                                langs.push(language.friendlySubtypeName);
+                            });
+                        }
+
+                        var row = generateRowID();
+
+                        var attributes = {};
+                        attributes["repeating_proficiencies_"+row+"_name"] = langs.join(', ');
+                        attributes["repeating_proficiencies_"+row+"_prof_type"] = 'LANGUAGE';
+                        attributes["repeating_proficiencies_"+row+"_options-flag"] = '0';
+
+                        setAttrs(object.id, attributes);
                     }
+                    else {
+                        if(languages != null) {
+                            languages.forEach(function(language) {
+                                var row = generateRowID();
 
-                    var row = generateRowID();
+                                var attributes = {};
+                                attributes["repeating_proficiencies_"+row+"_name"] = language.friendlySubtypeName;
+                                attributes["repeating_proficiencies_"+row+"_prof_type"] = 'LANGUAGE';
+                                attributes["repeating_proficiencies_"+row+"_options-flag"] = '0';
 
-                    var attributes = {};
-                    attributes["repeating_proficiencies_"+row+"_name"] = langs.join(', ');
-                    attributes["repeating_proficiencies_"+row+"_prof_type"] = 'LANGUAGE';
-                    attributes["repeating_proficiencies_"+row+"_options-flag"] = '0';
-
-                    setAttrs(object.id, attributes);
+                                setAttrs(object.id, attributes);
+                            });
+                        }
+                    }
                 }
+
 
                 // Import Proficiencies
                 if(state[state_name].config.imports.proficiencies){
@@ -688,7 +705,7 @@
                     'global_attack_mod_flag': 1,
                     'global_damage_mod_flag': 1,
                     'dtype': 'full',
-                    'init_tiebreaker': '@{dexterity}/100',
+                    'init_tiebreaker': state[state_name].config.initTieBreaker ? '@{dexterity}/100' : '',
                     'jack_of_all_trades': jack
                 };
 
@@ -922,27 +939,39 @@
         var prefixButton = makeButton(prefix, '!beyond --config prefix|?{Prefix}', buttonStyle);
         var overwriteButton = makeButton(state[state_name].config.overwrite, '!beyond --config overwrite|'+!state[state_name].config.overwrite, buttonStyle);
         var debugButton = makeButton(state[state_name].config.debug, '!beyond --config debug|'+!state[state_name].config.debug, buttonStyle);
-        
+
+        var listItems = [
+            '<span style="float: left; margin-top: 6px;">Overwrite:</span> '+overwriteButton,
+            '<span style="float: left; margin-top: 6px;">Prefix:</span> '+prefixButton,
+            '<span style="float: left; margin-top: 6px;">Debug:</span> '+debugButton
+        ]
+
+        var list = '<b>Importer</b>'+makeList(listItems, 'overflow: hidden; list-style: none; padding: 0; margin: 0;', 'overflow: hidden; margin-top: 5px;');
+
+        var languageGroupingButton = makeButton(state[state_name].config.languageGrouping, '!beyond --config languageGrouping|'+!state[state_name].config.languageGrouping, buttonStyle);
+        var initTieBreakerButton = makeButton(state[state_name].config.initTieBreaker, '!beyond --config initTieBreaker|'+!state[state_name].config.initTieBreaker, buttonStyle);
+
         var players = '';
-        var playerObjects = findObjs({                              
+        var playerObjects = findObjs({
             _type: "player",
         });
         for(var i = 0; i < playerObjects.length; i++) {
             players += '|'+playerObjects[i]['attributes']['_displayname']+','+playerObjects[i].id;
         }
-        
+
         var ipj = state[state_name].config.inplayerjournals == '' ? '[NONE]' : state[state_name].config.inplayerjournals;
         var inPlayerJournalsButton = makeButton(ipj, '!beyond --config inplayerjournals|?{Player|None,[NONE]|All Players,all'+players+'}', buttonStyle);
         var cb = state[state_name].config.controlledby == '' ? '[NONE]' : state[state_name].config.controlledby;
         var controlledByButton = makeButton(cb, '!beyond --config controlledby|?{Player|None,[NONE]|All Players,all'+players+'}', buttonStyle);
 
-        var listItems = [
-            '<span style="float: left; margin-top: 6px;">Overwrite:</span> '+overwriteButton,
-            '<span style="float: left; margin-top: 6px;">Prefix:</span> '+prefixButton,
-            '<span style="float: left; margin-top: 6px;">Debug:</span> '+debugButton,
-            '<span style="float: left; margin-top: 6px;">Player Journal:</span> '+inPlayerJournalsButton,
-            '<span style="float: left; margin-top: 6px;">Player Control:</span> '+controlledByButton
+        var sheetListItems = [
+            '<span style="float: left; margin-top: 6px;">In Player Journal:</span> '+inPlayerJournalsButton,
+            '<span style="float: left; margin-top: 6px;">Player Control Permission:</span> '+controlledByButton,
+            '<span style="float: left; margin-top: 6px;">Language Grouping:</span> '+languageGroupingButton,
+            '<span style="float: left; margin-top: 6px;">Initiative Tie Breaker:</span> '+initTieBreakerButton
         ]
+
+        var sheetList = '<hr><b>Character Sheet</b>'+makeList(sheetListItems, 'overflow: hidden; list-style: none; padding: 0; margin: 0;', 'overflow: hidden; margin-top: 5px;');
 
         var debug = '';
         if(state[state_name].config.debug){
@@ -955,12 +984,10 @@
             debug += '<hr><b>Imports</b>'+makeList(debugListItems, 'overflow: hidden; list-style: none; padding: 0; margin: 0;', 'overflow: hidden; margin-top: 5px;');
         }
 
-        var list = makeList(listItems, 'overflow: hidden; list-style: none; padding: 0; margin: 0;', 'overflow: hidden; margin-top: 5px;');
-
         var resetButton = makeButton('Reset', '!beyond --reset', buttonStyle + ' margin: auto; width: 90%; display: block; float: none;');
 
         var title_text = (first) ? script_name + ' First Time Setup' : script_name + ' Config';
-        var text = '<div style="'+style+'">'+makeTitle(title_text)+list+debug+'<hr>'+resetButton+'</div>';
+        var text = '<div style="'+style+'">'+makeTitle(title_text)+list+sheetList+debug+'<hr>'+resetButton+'</div>';
 
         sendChat('', '/w gm ' + text, null, {noarchive:true});
     };
@@ -975,7 +1002,7 @@
         ];
 
         var command_list = makeList(listItems, 'list-style: none; padding: 0; margin: 0;');
-        
+
         var text = '<div style="'+style+'">';
         text += makeTitle(script_name + ' Help');
         text += '<p>Go to a character on <a href="http://www.dndbeyond.com" target="_blank">D&D Beyond</a>, and put `/json` behind the link. Copy the full contents of this page and paste it behind the command `!beyond --import`.</p>';
@@ -1179,12 +1206,14 @@
             prefix: '',
             inplayerjournals: '',
             controlledby: '',
+            languageGrouping: false,
+            initTieBreaker: false,
             imports: {
                 classes: true,
                 class_spells: true,
                 class_traits: true,
                 inventory: true,
-                proficiencies: false,
+                proficiencies: true,
                 traits: true,
                 languages: true,
                 bonusses: true,
@@ -1192,65 +1221,27 @@
             }
         };
 
-        if(!state[state_name].config){
+        if(!state[state_name].config) {
             state[state_name].config = defaults;
-        }else{
-            if(!state[state_name].config.hasOwnProperty('command')){
-                state[state_name].config.command = 'beyond';
+        }
+
+        for(var item in defaults) {
+            if(!state[state_name].config.hasOwnProperty(item)) {
+                state[state_name].config[item] = defaults[item];
             }
-            if(!state[state_name].config.hasOwnProperty('overwrite')){
-                state[state_name].config.overwrite = false;
+        }
+
+        for(var item in defaults.imports) {
+            if(!state[state_name].config.imports.hasOwnProperty(item)) {
+                state[state_name].config.imports[item] = defaults.imports[item];
             }
-            if(!state[state_name].config.hasOwnProperty('debug')){
-                state[state_name].config.debug = false;
+        }
+
+        if(!state[state_name].config.hasOwnProperty('firsttime')){
+            if(!reset){
+                sendConfigMenu(true);
             }
-            if(!state[state_name].config.hasOwnProperty('prefix')){
-                state[state_name].config.prefix = '';
-            }
-            if(!state[state_name].config.hasOwnProperty('inplayerjournals')){
-                state[state_name].config.inplayerjournals = '';
-            }
-            if(!state[state_name].config.hasOwnProperty('controlledby')){
-                state[state_name].config.controlledby = '';
-            }
-            
-            if(!state[state_name].config.hasOwnProperty('imports')){
-                state[state_name].config.imports = defaults.imports;
-            }else{
-                if(!state[state_name].config.imports.hasOwnProperty('inventory')){
-                    state[state_name].config.imports.inventory = true;
-                }
-                if(!state[state_name].config.imports.hasOwnProperty('proficiencies')){
-                    state[state_name].config.imports.proficiencies = true;
-                }
-                if(!state[state_name].config.imports.hasOwnProperty('traits')){
-                    state[state_name].config.imports.traits = true;
-                }
-                if(!state[state_name].config.imports.hasOwnProperty('classes')){
-                    state[state_name].config.imports.classes = true;
-                }
-                if(!state[state_name].config.imports.hasOwnProperty('notes')){
-                    state[state_name].config.imports.notes = true;
-                }
-                if(!state[state_name].config.imports.hasOwnProperty('languages')){
-                    state[state_name].config.imports.languages = true;
-                }
-                if(!state[state_name].config.imports.hasOwnProperty('bonusses')){
-                    state[state_name].config.imports.bonusses = true;
-                }
-                if(!state[state_name].config.imports.hasOwnProperty('class_spells')){
-                    state[state_name].config.imports.class_spells = true;
-                }
-                if(!state[state_name].config.imports.hasOwnProperty('class_traits')){
-                    state[state_name].config.imports.class_traits = true;
-                }
-            }
-            if(!state[state_name].config.hasOwnProperty('firsttime')){
-                if(!reset){
-                    sendConfigMenu(true);
-                }
-                state[state_name].config.firsttime = false;
-            }
+            state[state_name].config.firsttime = false;
         }
     };
 })();
