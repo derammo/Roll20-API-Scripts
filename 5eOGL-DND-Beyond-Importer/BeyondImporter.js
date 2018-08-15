@@ -1,5 +1,5 @@
 /*
- * Version 0.3.2
+ * Version 0.3.3
  *
  * Made By Robin Kuiper
  * Skype: RobinKuiper.eu
@@ -43,7 +43,7 @@
 
     on('chat:message', function(msg) {
         if (msg.type != 'api') return;
-
+        
         // Split the message into command and argument(s)
         var args = msg.content.split(/ --(help|reset|config|imports|import) ?/g);
         var command = args.shift().substring(1).trim();
@@ -787,7 +787,7 @@
             }
             if (index < array.length) {
                 // set Timeout for async iteration
-                setTimeout(doChunk, 1);
+                setTimeout(doChunk, 10);
             }
         }
         doChunk();
@@ -874,56 +874,38 @@
         var damage = getObjects(spell, 'type', 'damage');
         if(damage.length !== 0 && (spell.definition.attackType !== "" || spell.definition.saveDcStat !== null)){
             damage = damage[0];
-            if(spell.definition.attackType == 0) spell.definition.attackType = 'none';
-            if(spell.definition.attackType == 1) spell.definition.attackType = 'melee';
-            if(spell.definition.attackType == 2) spell.definition.attackType = 'ranged';
-            attributes["repeating_spell-"+level+"_"+row+"_spellattack"] = (spell.definition.attackType === '') ? 'None' : spell.definition.attackType;
-            attributes["repeating_spell-"+level+"_"+row+"_spellsave"] = (spell.definition.saveDcAbilityId === null) ? '' : ucFirst(_ABILITY[_ABILITIES[spell.definition.saveDcAbilityId]]);
-            attributes["repeating_spell-"+level+"_"+row+"_spelldamage"] = (damage.die.fixedValue !== null) ? damage.die.fixedValue : damage.die.diceString;
-            attributes["repeating_spell-"+level+"_"+row+"_spelldamagetype"] = damage.friendlySubtypeName;
-
-            var ahl = spell.definition.atHigherLevels.higherLevelDefinitions;
-            for(var i in ahl) {
-                if(ahl[i].dice == null) continue;
-                attributes["repeating_spell-"+level+"_"+row+"_spellhldie"] = ahl[i].dice.diceCount;
-                attributes["repeating_spell-"+level+"_"+row+"_spellhldietype"] = 'd'+ahl[i].dice.diceValue;
+            if(damage.die.diceString != null) {
+                if(spell.definition.attackType == 0) spell.definition.attackType = 'none';
+                if(spell.definition.attackType == 1) spell.definition.attackType = 'melee';
+                if(spell.definition.attackType == 2) spell.definition.attackType = 'ranged';
+                attributes["repeating_spell-"+level+"_"+row+"_spellattack"] = (spell.definition.attackType === '') ? 'None' : spell.definition.attackType;
+                attributes["repeating_spell-"+level+"_"+row+"_spellsave"] = (spell.definition.saveDcAbilityId === null) ? '' : ucFirst(_ABILITY[_ABILITIES[spell.definition.saveDcAbilityId]]);
+                attributes["repeating_spell-"+level+"_"+row+"_spelldamage"] = damage.die.diceString;
+                attributes["repeating_spell-"+level+"_"+row+"_spelldamagetype"] = damage.friendlySubtypeName;
+                
+                if(damage.hasOwnProperty('atHigherLevels')) {
+                    var ahl = spell.definition.atHigherLevels.higherLevelDefinitions;
+                    if(spell.definition.level == 0 && ahl.length == 0) {
+                        if(spell.definition.atHigherLevels.scaleType == 'characterlevel') {
+                            attributes["repeating_spell-"+level+"_"+row+"_spell_damage_progression"] = 'Cantrip Dice';
+                        }
+                    }
+                    else {
+                        for(var i in ahl) {
+                            if(ahl[i].dice == null) continue;
+                            attributes["repeating_spell-"+level+"_"+row+"_spellhldie"] = ahl[i].dice.diceCount;
+                            attributes["repeating_spell-"+level+"_"+row+"_spellhldietype"] = 'd'+ahl[i].dice.diceValue;
+                        }
+            
+                        if(damage.atHigherLevels.scaleType === 'spellscale'){
+                            attributes["repeating_spell-"+level+"_"+row+"_spellhldie"] = '1';
+                            attributes["repeating_spell-"+level+"_"+row+"_spellhldietype"] = 'd'+damage.die.diceValue;
+                        }
+                    }
+                }
+    
+                attributes["repeating_spell-"+level+"_"+row+"_spelloutput"] = 'ATTACK';
             }
-
-            //if(spell.definition.requiresAttackRoll) attributes["repeating_spell-"+level+"_"+row+"_spelldmgmod"] = 'yes';
-
-            // FOR SPELLS WITH MULTIPLE DAMAGE OUTPUTS
-            //attributes["repeating_spell-"+level+"_"+row+"_spelldamage2"] = damage.die.diceString;
-            //attributes["repeating_spell-"+level+"_"+row+"_spelldamagetype2"] = damage.friendlySubtypeName;
-
-            // CREATE ATTACK
-            var attack = {
-                name: spell.definition.name,
-                range: (spell.definition.range.origin === 'Ranged') ? spell.definition.range.rangeValue + 'ft.' : spell.definition.range.origin,
-                attack: {
-                    attribute: _ABILITY[spell.spellCastingAbility] //_ABILITY[current_class.class.spellCastingAbility]
-                },
-                damage: {
-                    diceString: (damage.die.fixedValue !== null) ? damage.die.fixedValue : damage.die.diceString,
-                    type: damage.friendlySubtypeName,
-                    attribute: '0'
-                },
-                description: replaceChars(spell.definition.description)
-            }
-
-            //var attackid = createRepeatingAttack(object, attack);
-            //attributes["repeating_spell-"+level+"_"+row+"_rollcontent"] = '%{'+object.id+'|repeating_attack_'+attackid+'_attack}';
-            // /CREATE ATTACK
-
-            if(damage.hasOwnProperty('atHigherLevels') && damage.atHigherLevels.scaleType === 'spellscale'){
-                attributes["repeating_spell-"+level+"_"+row+"_spellhldie"] = '1';
-                attributes["repeating_spell-"+level+"_"+row+"_spellhldietype"] = 'd'+damage.die.diceValue;
-            }
-
-            // var newrowid = generateRowID();
-            // attributes["repeating_spell-"+level+"_"+row+"_spellattackid"] = newrowid;
-            // attributes["repeating_spell-"+level+"_"+row+"_rollcontent"] = "%{" + object.id + "|repeating_attack_" + newrowid + "_attack}";
-
-            attributes["repeating_spell-"+level+"_"+row+"_spelloutput"] = 'ATTACK';
         }
 
         setAttrs(object.id, attributes);
@@ -1066,7 +1048,7 @@
         attackattributes["repeating_attack_"+attackrow+"_atkrange"] = attack.range;
 
         attackattributes["repeating_attack_"+attackrow+"_dmgflag"] = '{{damage=1}} {{dmg1flag=1}}';
-        attackattributes["repeating_attack_"+attackrow+"_dmgbase"] = attack.damage.diceString;
+        attackattributes["repeating_attack_"+attackrow+"_dmgbase"] = typeof attack.damage.diceString == 'string' ? attack.damage.diceString+'' : '';
         attackattributes["repeating_attack_"+attackrow+"_dmgattr"] = (attack.damage.attribute === '0') ? '0' : '@{'+attack.damage.attribute+'_mod}';
         attackattributes["repeating_attack_"+attackrow+"_dmgtype"] = attack.damage.type;
         attackattributes["repeating_attack_"+attackrow+"_dmgcustcrit"] = attack.damage.diceString;
@@ -1224,7 +1206,7 @@
         if(!state[state_name].config) {
             state[state_name].config = defaults;
         }
-
+        
         for(var item in defaults) {
             if(!state[state_name].config.hasOwnProperty(item)) {
                 state[state_name].config[item] = defaults[item];
@@ -1236,7 +1218,7 @@
                 state[state_name].config.imports[item] = defaults.imports[item];
             }
         }
-
+        
         if(!state[state_name].config.hasOwnProperty('firsttime')){
             if(!reset){
                 sendConfigMenu(true);
