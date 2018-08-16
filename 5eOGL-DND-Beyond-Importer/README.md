@@ -38,19 +38,19 @@ https://www.dndbeyond.com/profile/Atheos/characters/1307201/json
 ```
 
 Copy the entire content of that page, and go to Roll20.
-In the Roll20 chat type the command `!beyond import` and paste the copied contents after that, eg:
+In the Roll20 chat type the command `!beyond --import` and paste the copied contents after that, eg:
 
 ```
-!beyond import {"character":{"id":1307201,"name":"Qroohk","player":"Atheos","age":null,"hair":null,"eyes":null,"skin":null,"height":null,"weight":null,"size":"Medium","alignment":"Lawful Good" ..........
+!beyond --import {"character":{"id":1307201,"name":"Qroohk","player":"Atheos","age":null,"hair":null,"eyes":null,"skin":null,"height":null,"weight":null,"size":"Medium","alignment":"Lawful Good" ..........
 ```
 
 Your character will be imported now!
 
 ### Commands
 
-* **!beyond help** - Shows the help menu.
-* **!beyond config** - Shows the config menu.
-* **!beyond import [CHARACTER JSON]** - Imports a character from the DNDBeyond json.
+* **!beyond --help** - Shows the help menu.
+* **!beyond --config** - Shows the config menu.
+* **!beyond --import [CHARACTER JSON]** - Imports a character from the DNDBeyond json.
 
 ![Config Menu](https://i.imgur.com/WLb76Uy.png "Config Menu")
 
