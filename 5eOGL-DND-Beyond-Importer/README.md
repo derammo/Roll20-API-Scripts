@@ -52,13 +52,15 @@ Your character will be imported now!
 * **!beyond --config** - Shows the config menu.
 * **!beyond --import [CHARACTER JSON]** - Imports a character from the DNDBeyond json.
 
-![Config Menu](https://i.imgur.com/WLb76Uy.png "Config Menu")
+![Config Menu](https://i.imgur.com/KKvT3s2.png "Config Menu")
 
 Roll20 Thread: https://app.roll20.net/forum/post/6248700/script-beta-beyondimporter-import-dndbeyond-character-sheets
 
 --- 
 
 #### Changelog:
+
+**For further updates [click here](https://github.com/sillvva/Roll20-API-Scripts/commits/master)**
 
 **v0.2.6 - by Matt DeKok (Sillvva)**
 * Implemented updates made by Roll20 5eOGL character sheet
