@@ -47,6 +47,7 @@ In the Roll20 chat type the command `!beyond --import` and paste the copied cont
 Your character will be imported now!
 
 **Note:** If you have multiple players in your game using this script, I recommend only importing one at a time.
+
 **Note:** I recommend giving spellcasters with a lot of spells an extra minute or two before opening the character sheet.
 
 ### Commands
