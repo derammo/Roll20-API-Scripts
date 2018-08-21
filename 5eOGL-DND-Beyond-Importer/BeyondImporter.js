@@ -383,7 +383,7 @@
                                 return attr.get('name').indexOf('prof_type') !== -1 && attr.get('current') == 'LANGUAGE';
                             });
                             if(matches[0]) {
-                                row = matches[0].get('name').replace('repeating_proficiencies_','').replace('_current','');
+                                row = matches[0].get('name').replace('repeating_proficiencies_','').replace('_prof_type','');
                             }
                         }
 
