@@ -1,5 +1,5 @@
 /*
- * Version 0.3.5
+ * Version 0.3.6
  *
  * Made By Robin Kuiper
  * Skype: RobinKuiper.eu
@@ -80,7 +80,8 @@
                             var key = setting.shift();
                             var value = (setting[0] === 'true') ? true : (setting[0] === 'false') ? false : (setting[0] === '[NONE]') ? '' : setting[0];
 
-                            if(key === 'prefix' && value.charAt(0) !== '_'){ value = '_' + value}
+                            if(key === 'prefix' && value.charAt(0) !== '_' && value.length > 0) { value = value + ' ';}
+                            if(key === 'suffix' && value.charAt(0) !== '_' && value.length > 0) { value = ' ' + value}
 
                             state[state_name][beyond_caller.id].config[key] = value;
                         }
@@ -116,15 +117,15 @@
 
                 class_spells = [];
                 all_attributes = {};
-                
+
                 object = null;
                 // Remove characters with the same name if overwrite is enabled.
                 if(state[state_name][beyond_caller.id].config.overwrite) {
                     var objects = findObjs({
                         _type: "character",
-                        name: character.name + state[state_name][beyond_caller.id].config.prefix
+                        name: state[state_name][beyond_caller.id].config.prefix + character.name + state[state_name][beyond_caller.id].config.suffix
                     }, {caseInsensitive: true});
-                    
+
                     if(objects.length > 0) {
                         object = objects[0];
                         for(var i = 1; i < objects.length; i++){
@@ -132,7 +133,7 @@
                         }
                     }
                 }
-                
+
                 if(!object) {
                     // Create character object
                     object = createObj("character", {
@@ -196,7 +197,7 @@
                         }
                     });
                 }
-                
+
                 speedMods = getObjects(character, 'subType', 'speed');
                 if(speedMods != null) {
                     speedMods.forEach(function(speedMod) {
@@ -216,22 +217,17 @@
                         speed += ', ' + key + ' ' + weightSpeeds.normal[key] + 'ft.';
                     }
                 }
-                
+
                 // Import Character Inventory
                 var hasArmor = false;
                 if(state[state_name][beyond_caller.id].config.imports.inventory) {
                     const inventory = character.inventory;
-                    if(inventory != null) inventory.forEach(function(item) {
-                        var row = generateRowID();
-                        if(state[state_name][beyond_caller.id].config.overwrite) {
-                            var matches = findObjs({ type: 'attribute', characterid: object.id }).filter(function(attr) {
-                                return attr.get('name').indexOf('itemname') !== -1 && attr.get('current') == item.definition.name;
-                            });
-                            if(matches[0]) {
-                                row = matches[0].get('name').replace('repeating_inventory_','').replace('_itemname','');
-                            }
-                        }
-                        
+                    var prevAdded = [];
+                    if(inventory != null) inventory.forEach(function(item, i) {
+                        var paIndex = prevAdded.filter(function(pAdded) { return pAdded == item.definition.name; }).length;
+                        var row = getRepeatingRowIds('inventory', 'itemname', item.definition.name)[paIndex];
+                        prevAdded.push(item.definition.name);
+
                         var attributes = {};
                         attributes["repeating_inventory_"+row+"_itemname"] = item.definition.name;
                         attributes["repeating_inventory_"+row+"_equipped"] = (item.equipped) ? '1' : '0';
@@ -256,13 +252,13 @@
                                     magic += grantedMod.value;
                                 }
                             });
-                            
+
                             // Finesse Weapon
                             var isFinesse = item.definition.properties.filter(function(property) { return property.name == 'Finesse'; }).length > 0;
                             if(isFinesse && getTotalAbilityScore(character, 2) > getTotalAbilityScore(character, item.definition.attackType)) {
                                 item.definition.attackType = 2;
                             }
-                            
+
                             // Hexblade's Weapon
                             var characterValues = getObjects(character.characterValues, 'valueId', item.id);
                             characterValues.forEach(function(cv) {
@@ -300,7 +296,7 @@
                             });
 
                             // var attackid = ;
-                            Object.assign(all_attributes, createRepeatingAttack(object, attack));
+                            Object.assign(all_attributes, createRepeatingAttack(object, attack, {index: paIndex, itemid: row}));
                             // /CREATE ATTACK
                         }
                         item.definition.grantedModifiers.forEach(function(grantedMod) {
@@ -339,31 +335,26 @@
                         Object.assign(all_attributes, attributes);
                     });
                 }
-                
+
                 // If character has unarmored defense, add it to the inventory, so a player can enable/disable it.
                 var unarmored = getObjects(character, 'subType', 'unarmored-armor-class');
+                var x = 0;
                 if(unarmored != null) unarmored.forEach(function(ua, i) {
                     if(ua.type != 'set') return;
                     if(ua.value == null) {
                         ua.value = Math.floor((getTotalAbilityScore(character, ua.statId) - 10) / 2);
                     }
 
-                    var row = generateRowID();
-                    if(state[state_name][beyond_caller.id].config.overwrite) {
-                        var matches = findObjs({ type: 'attribute', characterid: object.id }).filter(function(attr) {
-                            return attr.get('name').indexOf('itemname') !== -1 && attr.get('current') == 'Unarmored Defense'+(unarmored.legnth > 1 ? ' '+(parseInt(i)+1) : '');
-                        });
-                        if(matches[0]) {
-                            row = matches[0].get('name').replace('repeating_inventory_','').replace('_itemname','');
-                        }
-                    }
-                    
+                    var row = getRepeatingRowIds('inventory', 'itemname', 'Unarmored Defense')[x];
+
                     var attributes = {}
-                    attributes["repeating_inventory_"+row+"_itemname"] = 'Unarmored Defense'+(unarmored.legnth > 1 ? ' '+(parseInt(i)+1) : '');
+                    attributes["repeating_inventory_"+row+"_itemname"] = 'Unarmored Defense';
                     attributes["repeating_inventory_"+row+"_equipped"] = !hasArmor ? '1' : '0';
                     attributes["repeating_inventory_"+row+"_itemcount"] = 1;
                     attributes["repeating_inventory_"+row+"_itemmodifiers"] = 'AC: '+ua.value;
                     Object.assign(all_attributes, attributes);
+
+                    x++;
                 });
 
                 // Languages
@@ -377,15 +368,7 @@
                             });
                         }
 
-                        var row = generateRowID();
-                        if(state[state_name][beyond_caller.id].config.overwrite) {
-                            var matches = findObjs({ type: 'attribute', characterid: object.id }).filter(function(attr) {
-                                return attr.get('name').indexOf('prof_type') !== -1 && attr.get('current') == 'LANGUAGE';
-                            });
-                            if(matches[0]) {
-                                row = matches[0].get('name').replace('repeating_proficiencies_','').replace('_prof_type','');
-                            }
-                        }
+                        var row = getRepeatingRowIds('proficiencies', 'prof_type', 'LANGUAGE')[0];
 
                         var attributes = {};
                         attributes["repeating_proficiencies_"+row+"_name"] = langs.join(', ');
@@ -397,20 +380,8 @@
                     else {
                         if(languages != null) {
                             languages.forEach(function(language) {
-                                var row = generateRowID();
-
+                                var row = getRepeatingRowIds('proficiencies', 'name', language.friendlySubtypeName)[0];
                                 var attributes = {};
-                                if(state[state_name][beyond_caller.id].config.overwrite) {
-                                    var matches = findObjs({ type: 'attribute', characterid: object.id })
-                                    .filter(function(attr) {
-                                        return attr.get('name').indexOf('repeating_proficiencies') !== -1 && attr.get('name').indexOf('name') !== -1 && attr.get('current') == language.friendlySubtypeName;
-                                    });
-                                    if(matches[0]) {
-                                        row = matches[0].get('name').replace('repeating_proficiencies_','').replace('_name','');
-                                        // sendChat(script_name, item.definition.name+': '+row, null, {noarchive:true});
-                                    }
-                                }
-                                
                                 attributes["repeating_proficiencies_"+row+"_name"] = language.friendlySubtypeName;
                                 attributes["repeating_proficiencies_"+row+"_prof_type"] = 'LANGUAGE';
                                 attributes["repeating_proficiencies_"+row+"_options-flag"] = '0';
@@ -424,6 +395,7 @@
                 // Import Proficiencies
                 const weapons = ['Club', 'Dagger', 'Greatclub', 'Handaxe', 'Javelin', 'Light hammer', 'Mace', 'Quarterstaff', 'Sickle', 'Spear', 'Crossbow, Light', 'Dart', 'Shortbow', 'Sling', 'Battleaxe', 'Flail', 'Glaive', 'Greataxe', 'Greatsword', 'Halberd', 'Lance', 'Longsword', 'Maul', 'Morningstar', 'Pike', 'Rapier', 'Scimitar', 'Shortsword', 'Trident', 'War pick', 'Warhammer', 'Whip', 'Blowgun', 'Crossbow, Hand', 'Crossbow, Heavy', 'Longbow', 'Net'];
                 var proficiencies = getObjects(character, 'type', 'proficiency');
+                var profs = [];
                 if(proficiencies != null) {
                     proficiencies.forEach(function(prof) {
                         var skill = prof.subType.replace(/-/g, '_');
@@ -433,17 +405,10 @@
                             Object.assign(all_attributes, attributes);
                         }
                         else if(state[state_name][beyond_caller.id].config.imports.proficiencies) {
-                            var row = generateRowID();
-                            if(state[state_name][beyond_caller.id].config.overwrite) {
-                                var matches = findObjs({ type: 'attribute', characterid: object.id })
-                                .filter(function(attr) {
-                                    return attr.get('name').indexOf('repeating_proficiencies') !== -1 && attr.get('name').indexOf('name') !== -1 && attr.get('current') == prof.friendlySubtypeName;
-                                });
-                                if(matches[0]) {
-                                    row = matches[0].get('name').replace('repeating_proficiencies_','').replace('_name','');
-                                    // sendChat(script_name, item.definition.name+': '+row, null, {noarchive:true});
-                                }
-                            }
+                            if(profs.indexOf(prof.friendlySubtypeName) !== -1) return;
+                            profs.push(prof.friendlySubtypeName);
+
+                            var row = getRepeatingRowIds('proficiencies', 'name', prof.friendlySubtypeName)[0];
 
                             var attributes = {}
                             attributes["repeating_proficiencies_" + row + "_name"] = prof.friendlySubtypeName;
@@ -481,7 +446,7 @@
                         Object.assign(all_attributes, attrs);
                     }
                     // Feats
-                    character.feats.forEach(function(feat) {
+                    character.feats.forEach(function(feat, fi) {
                         var t = {
                             name: feat.definition.name,
                             description: replaceChars(feat.definition.description),
@@ -489,11 +454,12 @@
                             source_type: feat.definition.name
                         };
 
-                        var attrs = createRepeatingTrait(object, t);
+                        var attrs = createRepeatingTrait(object, t, fi);
                         Object.assign(all_attributes, attrs);
                     });
                     // Race Features
                     if(character.race.racialTraits != null) {
+                        var ti = 0;
                         character.race.racialTraits.forEach(function(trait) {
                             if(['Languages', 'Darkvision', 'Superior Darkvision', 'Skills', 'Ability Score Increase', 'Feat', 'Age', 'Alignment', 'Size', 'Speed', 'Skill Versatility', 'Dwarven Combat Training', 'Keen Senses', 'Elf Weapon Training', 'Extra Language', 'Tool Proficiency'].indexOf(trait.definition.name) !== -1) {
                                 return;
@@ -516,7 +482,7 @@
                                 source_type: character.race.fullName
                             };
 
-                            var attrs = createRepeatingTrait(object, t);
+                            var attrs = createRepeatingTrait(object, t, ti);
                             Object.assign(all_attributes, attrs);
 
                             var spells = getFeatureSpells(character, trait.id, 'race');
@@ -524,6 +490,8 @@
                                 spell.spellCastingAbility = _ABILITIES[spell.spellCastingAbilityId];
                                 class_spells.push(spell);
                             });
+
+                            ti++;
                         });
                     }
                 }
@@ -556,6 +524,7 @@
                         }
 
                         if(state[state_name][beyond_caller.id].config.imports.class_traits){
+                            var ti = 0;
                             current_class.definition.classFeatures.forEach(function(trait) {
                                 if(['Spellcasting', 'Divine Domain', 'Ability Score Improvement', 'Bonus Cantrip', 'Proficiencies', 'Hit Points', 'Arcane Tradition', 'Otherworldly Patron', 'Pact Magic', 'Expanded Spell List', 'Ranger Archetype', 'Druidic', 'Druid Circle', 'Sorcerous Origin', 'Monastic Tradition', 'Bardic College', 'Expertise', 'Roguish Archetype', 'Sacred Oath', 'Oath Spells', 'Martial Archetype'].indexOf(trait.name) !== -1) {
                                     return;
@@ -577,7 +546,7 @@
                                     source_type: current_class.definition.name
                                 };
 
-                                Object.assign(all_attributes, createRepeatingTrait(object, t));
+                                Object.assign(all_attributes, createRepeatingTrait(object, t, ti));
 
                                 var spells = getFeatureSpells(character, trait.id, 'class');
                                 spells.forEach(function(spell) {
@@ -604,9 +573,12 @@
                                         }
                                     });
                                 }
+
+                                ti++;
                             });
 
                             if(current_class.subclassDefinition != null) {
+                                var ti = 0;
                                 current_class.subclassDefinition.classFeatures.forEach(function(trait) {
                                     if(['Spellcasting', 'Bonus Proficiency', 'Divine Domain', 'Ability Score Improvement', 'Bonus Cantrip', 'Proficiencies', 'Hit Points', 'Arcane Tradition', 'Otherworldly Patron', 'Pact Magic', 'Expanded Spell List', 'Ranger Archetype', 'Druidic', 'Druid Circle', 'Sorcerous Origin', 'Monastic Tradition', 'Bardic College', 'Expertise', 'Roguish Archetype', 'Sacred Oath', 'Oath Spells', 'Martial Archetype'].indexOf(trait.name) !== -1) {
                                         return;
@@ -628,13 +600,15 @@
                                         source_type: current_class.definition.name
                                     }
 
-                                    Object.assign(all_attributes, createRepeatingTrait(object, t));
+                                    Object.assign(all_attributes, createRepeatingTrait(object, t, ti));
 
                                     var spells = getFeatureSpells(character, trait.id, 'class');
                                     spells.forEach(function(spell) {
                                         spell.spellCastingAbility = _ABILITIES[spell.spellCastingAbilityId];
                                         class_spells.push(spell);
                                     });
+
+                                    ti++;
                                 });
                             }
                         }
@@ -673,17 +647,7 @@
                     }
 
                     if(expertise.subType === 'thieves-tools') {
-                        var row = generateRowID();
-                        if(state[state_name][beyond_caller.id].config.overwrite) {
-                            var matches = findObjs({ type: 'attribute', characterid: object.id })
-                            .filter(function(attr) {
-                                return attr.get('name').indexOf('repeating_proficiencies') !== -1 && attr.get('name').indexOf('name') !== -1 && attr.get('current') == expertise.friendlySubtypeName;
-                            });
-                            if(matches[0]) {
-                                row = matches[0].get('name').replace('repeating_proficiencies_','').replace('_name','');
-                                // sendChat(script_name, item.definition.name+': '+row, null, {noarchive:true});
-                            }
-                        }
+                        var row = getRepeatingRowIds('proficiencies', 'name', expertise.friendlySubtypeName)[0];
 
                         var attributes = {}
                         attributes["repeating_proficiencies_"+row+"_name"] = expertise.friendlySubtypeName;
@@ -907,17 +871,7 @@
 
     const importSpell = function(character, spell, addAttack) {
         var level = (spell.definition.level === 0) ? 'cantrip' : spell.definition.level.toString();
-        var row = generateRowID();
-        if(state[state_name][beyond_caller.id].config.overwrite) {
-            var matches = findObjs({ type: 'attribute', characterid: object.id })
-            .filter(function(attr) {
-                return attr.get('name').indexOf('repeating_spell-'+level) !== -1 && attr.get('name').indexOf('spellname') !== -1 && attr.get('current') == spell.definition.name;
-            })
-            if(matches[0]) {
-                row = matches[0].get('name').replace('repeating_spell-'+level+'_','').replace('_spellname','');
-                // sendChat(script_name, spell.definition.name+': '+row, null, {noarchive:true});
-            }
-        }
+        var row = getRepeatingRowIds('spell-'+level, 'spellname', spell.definition.name)[0];
 
         spell.castingTime = {
             castingTimeInterval: spell.activation.activationTime,
@@ -1034,39 +988,6 @@
                 }
 
                 if(addAttack) attributes["repeating_spell-"+level+"_"+row+"_spelloutput"] = 'ATTACK';
-                /*else {
-                    var attackrow = generateRowID();
-                    var attackattributes = {};
-                    attackattributes["repeating_attack_"+attackrow+"_options-flag"] = '0';
-                    attackattributes["repeating_attack_"+attackrow+"_atkname"] = spell.definition.name;
-                    attackattributes["repeating_attack_"+attackrow+"_atkflag"] = (spell.definition.attackType === '') ? '' : '{{attack=1}}';
-                    attackattributes["repeating_attack_"+attackrow+"_atkattr_base"] = '@{'+_ABILITY[spell.spellCastingAbility]+'_mod}';
-                    attackattributes["repeating_attack_"+attackrow+"_atkprofflag"] = '(@{pb})';
-                    attackattributes["repeating_attack_"+attackrow+"_atkmagic"] = '';
-                    attackattributes["repeating_attack_"+attackrow+"_atkrange"] = (spell.definition.range.origin === 'Ranged') ? spell.definition.range.rangeValue + 'ft.' : spell.definition.range.origin;
-
-                    attackattributes["repeating_attack_"+attackrow+"_dmgflag"] = '{{damage=1}} {{dmg1flag=1}}';
-                    attackattributes["repeating_attack_"+attackrow+"_dmgbase"] = typeof damage.die.diceString == 'string' ? damage.die.diceString+'' : '';
-                    attackattributes["repeating_attack_"+attackrow+"_dmgattr"] = '0';//(attack.damage.attribute === '0') ? '0' : '@{'+attack.damage.attribute+'_mod}';
-                    attackattributes["repeating_attack_"+attackrow+"_dmgtype"] = damage.friendlySubtypeName;
-
-                    if(hlDiceCount != '' && level > 0) {
-                        var hl = '';
-                        var base = 0;
-                        for(var lvl = level; lvl <= 9; lvl++) {
-                            hl += '|Level '+lvl+','+base;
-                            base++;
-                        }
-                        attackattributes["repeating_attack_"+attackrow+"_hldmg"] = '{{hldmg=[[('+hlDiceCount+'*?{Cast at what level?'+hl+'})d'+hlDiceValue+']]}}';
-                    }
-
-                    attackattributes["repeating_attack_"+attackrow+"_spellid"] = row;
-                    attackattributes["repeating_attack_"+attackrow+"_spelllevel"] = level;
-
-                    attackattributes["repeating_attack_"+attackrow+"_atk_desc"] = '';
-
-                    Object.assign(attributes, attackattributes);
-                }*/
             }
         }
 
@@ -1082,6 +1003,7 @@
         var playerid = player.id;
         var prefix = (state[state_name][playerid].config.prefix !== '') ? state[state_name][playerid].config.prefix : '[NONE]';
         var prefixButton = makeButton(prefix, '!beyond --config prefix|?{Prefix}', buttonStyle);
+        var suffixButton = makeButton(suffix, '!beyond --config suffix|?{Suffix}', buttonStyle);
         var overwriteButton = makeButton(state[state_name][playerid].config.overwrite, '!beyond --config overwrite|'+!state[state_name][playerid].config.overwrite, buttonStyle);
         var debugButton = makeButton(state[state_name][playerid].config.debug, '!beyond --config debug|'+!state[state_name][playerid].config.debug, buttonStyle);
         // var silentSpellsButton = makeButton(state[state_name][playerid].config.silentSpells, '!beyond --config silentSpells|'+!state[state_name][playerid].config.silentSpells, buttonStyle);
@@ -1089,6 +1011,7 @@
         var listItems = [
             '<span style="float: left; margin-top: 6px;">Overwrite:</span> '+overwriteButton+'<br /><small style="clear: both; display: inherit;">This option will overwrite an existing character sheet with a matching character name. I recommend making a backup copy just in case.</small>',
             '<span style="float: left; margin-top: 6px;">Prefix:</span> '+prefixButton,
+            '<span style="float: left; margin-top: 6px;">Suffix:</span> '+suffixButton,
             '<span style="float: left; margin-top: 6px;">Debug:</span> '+debugButton,
             // '<span style="float: left; margin-top: 6px;">Silent Spells:</span> '+silentSpellsButton
         ]
@@ -1196,18 +1119,34 @@
         return text;
     };
 
-    const createRepeatingTrait = function(object, trait) {
-        var row = generateRowID();
+    const getRepeatingRowIds = function(section, attribute, matchValue) {
+        var ids = [];
         if(state[state_name][beyond_caller.id].config.overwrite) {
             var matches = findObjs({ type: 'attribute', characterid: object.id })
-            .filter(function(attr) {
-                return attr.get('name').indexOf('repeating_traits') !== -1 && attr.get('name').indexOf('name') !== -1 && attr.get('current') == trait.name;
-            })
-            if(matches[0]) {
-                row = matches[0].get('name').replace('repeating_traits_','').replace('_name','');
-                // sendChat(script_name, item.definition.name+': '+row, null, {noarchive:true});
+                .filter(function(attr) {
+                    return attr.get('name').indexOf('repeating_'+section) !== -1 && attr.get('name').indexOf(attribute) !== -1 && attr.get('current') == matchValue;
+                });
+            for(var i in matches) {
+                var row = matches[i].get('name').replace('repeating_'+section+'_','').replace('_'+attribute,'');
+                ids.push(row);
+                // if(section == 'inventory') sendChat(script_name, matchValue+' ('+ids.length+')'+': '+row, null, {noarchive:true});
             }
         }
+        else ids.push(generateRowID());
+        return ids;
+    }
+
+    const createRepeatingTrait = function(object, trait, options) {
+        var options = options || {};
+
+        var opts = {
+            index: 0,
+            itemid: ''
+        };
+        Object.assign(opts, options);
+
+        var row = getRepeatingRowIds('traits', 'name', trait.name)[opts.index];
+        if(row == null) row = generateRowID();
 
         var attributes = {}
         attributes["repeating_traits_"+row+"_name"] = trait.name;
@@ -1215,26 +1154,26 @@
         attributes["repeating_traits_"+row+"_source_type"] = trait.source_type;
         attributes["repeating_traits_"+row+"_description"] = replaceChars(trait.description);
         attributes["repeating_traits_"+row+"_options-flag"] = '0';
-        
+
         return attributes;
     };
 
-    const createRepeatingAttack = function(object, attack) {
-        var attackrow = generateRowID();
-        if(state[state_name][beyond_caller.id].config.overwrite) {
-            var matches = findObjs({ type: 'attribute', characterid: object.id })
-            .filter(function(attr) {
-                return attr.get('name').indexOf('repeating_attack') !== -1 && attr.get('name').indexOf('atkname') !== -1 && attr.get('current') == attack.name;
-            })
-            if(matches[0]) {
-                attackrow = matches[0].get('name').replace('repeating_attack_','').replace('_atkname','');
-                // sendChat(script_name, item.definition.name+': '+row, null, {noarchive:true});
-            }
-        }
-        
+    const createRepeatingAttack = function(object, attack, options) {
+        var options = options || {};
+
+        var opts = {
+            index: 0,
+            itemid: ''
+        };
+        Object.assign(opts, options);
+
+        var attackrow = getRepeatingRowIds('attack', 'atkname', attack.name)[opts.index];
+        if(attackrow == null) attackrow = generateRowID();
+
         var attackattributes = {};
         attackattributes["repeating_attack_"+attackrow+"_options-flag"] = '0';
         attackattributes["repeating_attack_"+attackrow+"_atkname"] = attack.name;
+        attackattributes["repeating_attack_"+attackrow+"_itemid"] = opts.itemid;
         attackattributes["repeating_attack_"+attackrow+"_atkflag"] = '{{attack=1}}';
         attackattributes["repeating_attack_"+attackrow+"_atkattr_base"] = '@{'+attack.attack.attribute+'_mod}';
         attackattributes["repeating_attack_"+attackrow+"_atkprofflag"] = '(@{pb})';
@@ -1378,7 +1317,7 @@
             overwrite: false,
             debug: false,
             prefix: '',
-            // silentSpells: false,
+            suffix: '',
             inplayerjournals: '',
             controlledby: '',
             languageGrouping: false,
