@@ -210,14 +210,14 @@
                         }
                     });
                 }
-
+                
                 var speed = weightSpeeds.normal.walk + 'ft.';
                 for(var key in weightSpeeds.normal){
                     if(key !== 'walk' && weightSpeeds.normal[key] !== 0){
                         speed += ', ' + key + ' ' + weightSpeeds.normal[key] + 'ft.';
                     }
                 }
-
+                
                 // Import Character Inventory
                 var hasArmor = false;
                 if(state[state_name][beyond_caller.id].config.imports.inventory) {
@@ -225,7 +225,7 @@
                     var prevAdded = [];
                     if(inventory != null) inventory.forEach(function(item, i) {
                         var paIndex = prevAdded.filter(function(pAdded) { return pAdded == item.definition.name; }).length;
-                        var row = getRepeatingRowIds('inventory', 'itemname', item.definition.name)[paIndex];
+                        var row = getRepeatingRowIds('inventory', 'itemname', item.definition.name, paIndex);
                         prevAdded.push(item.definition.name);
 
                         var attributes = {};
@@ -294,9 +294,9 @@
                                     }
                                 }
                             });
-
-                            // var attackid = ;
-                            Object.assign(all_attributes, createRepeatingAttack(object, attack, {index: paIndex, itemid: row}));
+                            
+                            var repAttack = createRepeatingAttack(object, attack, {index: paIndex, itemid: row});
+                            Object.assign(all_attributes, repAttack);
                             // /CREATE ATTACK
                         }
                         item.definition.grantedModifiers.forEach(function(grantedMod) {
@@ -335,7 +335,7 @@
                         Object.assign(all_attributes, attributes);
                     });
                 }
-
+                
                 // If character has unarmored defense, add it to the inventory, so a player can enable/disable it.
                 var unarmored = getObjects(character, 'subType', 'unarmored-armor-class');
                 var x = 0;
@@ -391,7 +391,7 @@
                         }
                     }
                 }
-
+                
                 // Import Proficiencies
                 const weapons = ['Club', 'Dagger', 'Greatclub', 'Handaxe', 'Javelin', 'Light hammer', 'Mace', 'Quarterstaff', 'Sickle', 'Spear', 'Crossbow, Light', 'Dart', 'Shortbow', 'Sling', 'Battleaxe', 'Flail', 'Glaive', 'Greataxe', 'Greatsword', 'Halberd', 'Lance', 'Longsword', 'Maul', 'Morningstar', 'Pike', 'Rapier', 'Scimitar', 'Shortsword', 'Trident', 'War pick', 'Warhammer', 'Whip', 'Blowgun', 'Crossbow, Hand', 'Crossbow, Heavy', 'Longbow', 'Net'];
                 var proficiencies = getObjects(character, 'type', 'proficiency');
@@ -725,13 +725,13 @@
                     'inspiration': (character.inspiration) ? 'on' : 0,
 
                     // Bio Info
-                    'age': character.age ? character.age : '',
-                    /*'size': character.size,*/
+                    // 'age': character.age ? character.age : '',
+                    // 'size': character.size,
                     // 'height': character.height ? character.height : '',
                     // 'weight': character.weight ? character.weight : '',
-                    'eyes': character.eyes ? character.eyes : '',
-                    'hair': character.hair ? character.hair : '',
-                    'skin': character.skin ? character.skin : '',
+                    // 'eyes': character.eyes ? character.eyes : '',
+                    // 'hair': character.hair ? character.hair : '',
+                    // 'skin': character.skin ? character.skin : '',
                     // 'character_appearance': character.traits.appearance,
 
                     // Class(es)
@@ -781,9 +781,9 @@
 
                 Object.assign(all_attributes, other_attributes);
                 // Object.assign(all_attributes, bonus_attributes);
-
+                
                 setAttrs(object.id, all_attributes);
-
+                
                 if(state[state_name][beyond_caller.id].config.imports.class_spells) {
                     onSheetWorkerCompleted(function() {
                         importSpells(character, class_spells)
@@ -1119,7 +1119,7 @@
         return text;
     };
 
-    const getRepeatingRowIds = function(section, attribute, matchValue) {
+    const getRepeatingRowIds = function(section, attribute, matchValue, index) {
         var ids = [];
         if(state[state_name][beyond_caller.id].config.overwrite) {
             var matches = findObjs({ type: 'attribute', characterid: object.id })
@@ -1131,9 +1131,12 @@
                 ids.push(row);
                 // if(section == 'inventory') sendChat(script_name, matchValue+' ('+ids.length+')'+': '+row, null, {noarchive:true});
             }
+            if(ids.length == 0) ids.push(generateRowID());
         }
         else ids.push(generateRowID());
-        return ids;
+        
+        if(index == null) return ids;
+        else return ids[index] == null && index > 0 ? ids[0] : ids[index];
     }
 
     const createRepeatingTrait = function(object, trait, options) {
@@ -1145,8 +1148,7 @@
         };
         Object.assign(opts, options);
 
-        var row = getRepeatingRowIds('traits', 'name', trait.name)[opts.index];
-        if(row == null) row = generateRowID();
+        var row = getRepeatingRowIds('traits', 'name', trait.name, opts.index);
 
         var attributes = {}
         attributes["repeating_traits_"+row+"_name"] = trait.name;
@@ -1167,8 +1169,7 @@
         };
         Object.assign(opts, options);
 
-        var attackrow = getRepeatingRowIds('attack', 'atkname', attack.name)[opts.index];
-        if(attackrow == null) attackrow = generateRowID();
+        var attackrow = getRepeatingRowIds('attack', 'atkname', attack.name, opts.index);
 
         var attackattributes = {};
         attackattributes["repeating_attack_"+attackrow+"_options-flag"] = '0';
