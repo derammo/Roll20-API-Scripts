@@ -210,14 +210,14 @@
                         }
                     });
                 }
-                
+
                 var speed = weightSpeeds.normal.walk + 'ft.';
                 for(var key in weightSpeeds.normal){
                     if(key !== 'walk' && weightSpeeds.normal[key] !== 0){
                         speed += ', ' + key + ' ' + weightSpeeds.normal[key] + 'ft.';
                     }
                 }
-                
+
                 // Import Character Inventory
                 var hasArmor = false;
                 if(state[state_name][beyond_caller.id].config.imports.inventory) {
@@ -294,7 +294,7 @@
                                     }
                                 }
                             });
-                            
+
                             var repAttack = createRepeatingAttack(object, attack, {index: paIndex, itemid: row});
                             Object.assign(all_attributes, repAttack);
                             // /CREATE ATTACK
@@ -335,7 +335,7 @@
                         Object.assign(all_attributes, attributes);
                     });
                 }
-                
+
                 // If character has unarmored defense, add it to the inventory, so a player can enable/disable it.
                 var unarmored = getObjects(character, 'subType', 'unarmored-armor-class');
                 var x = 0;
@@ -391,7 +391,7 @@
                         }
                     }
                 }
-                
+
                 // Import Proficiencies
                 const weapons = ['Club', 'Dagger', 'Greatclub', 'Handaxe', 'Javelin', 'Light hammer', 'Mace', 'Quarterstaff', 'Sickle', 'Spear', 'Crossbow, Light', 'Dart', 'Shortbow', 'Sling', 'Battleaxe', 'Flail', 'Glaive', 'Greataxe', 'Greatsword', 'Halberd', 'Lance', 'Longsword', 'Maul', 'Morningstar', 'Pike', 'Rapier', 'Scimitar', 'Shortsword', 'Trident', 'War pick', 'Warhammer', 'Whip', 'Blowgun', 'Crossbow, Hand', 'Crossbow, Heavy', 'Longbow', 'Net'];
                 var proficiencies = getObjects(character, 'type', 'proficiency');
@@ -781,9 +781,9 @@
 
                 Object.assign(all_attributes, other_attributes);
                 // Object.assign(all_attributes, bonus_attributes);
-                
+
                 setAttrs(object.id, all_attributes);
-                
+
                 if(state[state_name][beyond_caller.id].config.imports.class_spells) {
                     onSheetWorkerCompleted(function() {
                         importSpells(character, class_spells)
@@ -1003,6 +1003,7 @@
         var playerid = player.id;
         var prefix = (state[state_name][playerid].config.prefix !== '') ? state[state_name][playerid].config.prefix : '[NONE]';
         var prefixButton = makeButton(prefix, '!beyond --config prefix|?{Prefix}', buttonStyle);
+        var suffix = (state[state_name][playerid].config.suffix !== '') ? state[state_name][playerid].config.suffix : '[NONE]';
         var suffixButton = makeButton(suffix, '!beyond --config suffix|?{Suffix}', buttonStyle);
         var overwriteButton = makeButton(state[state_name][playerid].config.overwrite, '!beyond --config overwrite|'+!state[state_name][playerid].config.overwrite, buttonStyle);
         var debugButton = makeButton(state[state_name][playerid].config.debug, '!beyond --config debug|'+!state[state_name][playerid].config.debug, buttonStyle);
@@ -1134,7 +1135,7 @@
             if(ids.length == 0) ids.push(generateRowID());
         }
         else ids.push(generateRowID());
-        
+
         if(index == null) return ids;
         else return ids[index] == null && index > 0 ? ids[0] : ids[index];
     }
