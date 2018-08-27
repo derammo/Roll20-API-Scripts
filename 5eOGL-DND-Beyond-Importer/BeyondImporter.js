@@ -1,5 +1,5 @@
 /*
- * Version 0.3.6
+ * Version 0.3.7
  *
  * Made By Robin Kuiper
  * Skype: RobinKuiper.eu
@@ -20,15 +20,20 @@
 (function() {
     const _ABILITIES = {1:'STR',2:'DEX',3:'CON',4:'INT',5:'WIS',6:'CHA'};
     const _ABILITY = {'STR': 'strength', 'DEX': 'dexterity', 'CON': 'constitution', 'INT': 'intelligence', 'WIS': 'wisdom', 'CHA': 'charisma'}
-
-    const skills = ['acrobatics', 'animal_handling', 'arcana', 'athletics', 'deception', 'history', 'insight', 'intimidation', 'investigation', 'medicine', 'nature', 'perception', 'performance', 'persuasion', 'religion', 'sleight_of_hand', 'stealth', 'survival']
+    const alignments = ['','Lawful Good', 'Neutral Good', 'Chaotic Good', 'Lawful Neutral', 'Neutral', 'Chaotic Neutral', 'Lawful Evil', 'Neutral Evil', 'Chaotic Evil'];
+    const skills = ['acrobatics', 'animal_handling', 'arcana', 'athletics', 'deception', 'history', 'insight', 'intimidation', 'investigation', 'medicine', 'nature', 'perception', 'performance', 'persuasion', 'religion', 'sleight_of_hand', 'stealth', 'survival'];
+    const strength_skills = ['athletics'];
+    const dexterity_skills = ['acrobatics', 'sleight of hand', 'stealth'];
+    const intelligence_skills = ['arcana','history','investigation','nature','religion'];
+    const wisdom_skills = ['animal_handling','medicine','perception','survival'];
+    const charisma_skills = ['deception','intimidation','performance','persuasion']
 
     var class_spells = [];
     var beyond_caller = {};
     var object;
 
     // Styling for the chat responses.
-    const style = "overflow: hidden; background-color: #fff; border: 1px solid #000; padding: 5px; border-radius: 5px;";
+    const style = "margin-left: -45px; overflow: hidden; background-color: #fff; border: 1px solid #000; padding: 5px; border-radius: 5px;";
     const buttonStyle = "background-color: #000; border: 1px solid #292929; border-radius: 3px; padding: 5px; color: #fff; text-align: center; float: right;"
 
     var jack = '0';
@@ -420,7 +425,7 @@
                     });
                 }
 
-                if(state[state_name][beyond_caller.id].config.imports.traits && false) {
+                if(state[state_name][beyond_caller.id].config.imports.traits) {
                     // Background Feature
                     if(character.background.definition != null) {
                         var btrait = {
@@ -636,6 +641,68 @@
                     });
                 }
 
+                var proficiencies = getObjects(character, 'type', 'proficiency');
+                skills.forEach(function(skill) {
+                    var skill_prof = getObjects(proficiencies, 'subType', skill.replace(/_/g, '-'));
+                    if(skill_prof.length == 0) {
+                        var hpModifiers = getObjects(character.modifiers.class, 'type', 'half-proficiency');
+                        var hprModifiers = getObjects(character.modifiers.class, 'type', 'half-proficiency-round-up');
+                        if(hprModifiers.length > 0) {
+                            hprModifiers.forEach(function(modifier) {
+                                if(
+                                    modifier.subType == 'ability-checks'
+                                    || (modifier.subType == 'strength-ability-checks' && strength_skills.indexOf(skill) !== -1)
+                                    || (modifier.subType == 'dexterity-ability-checks' && dexterity_skills.indexOf(skill) !== -1)
+                                    || (modifier.subType == 'intelligence-ability-checks' && intelligence_skills.indexOf(skill) !== -1)
+                                    || (modifier.subType == 'wisdom-ability-checks' && wisdom_skills.indexOf(skill) !== -1)
+                                    || (modifier.subType == 'charisma-ability-checks' && charisma_skills.indexOf(skill) !== -1)
+                                ) {
+                                    var attributes = {};
+                                    attributes[skill + "_flat"] = Math.ceil((Math.floor((total_level - 1) / 4) + 2) / 2);
+                                    Object.assign(all_attributes, attributes);
+                                }
+                            });
+                        }
+                        else if(hpModifiers.length > 0) {
+                            hpModifiers.forEach(function(modifier) {
+                                if(
+                                    modifier.subType == 'ability-checks'
+                                    || (modifier.subType == 'strength-ability-checks' && strength_skills.indexOf(skill) !== -1)
+                                    || (modifier.subType == 'dexterity-ability-checks' && dexterity_skills.indexOf(skill) !== -1)
+                                    || (modifier.subType == 'intelligence-ability-checks' && intelligence_skills.indexOf(skill) !== -1)
+                                    || (modifier.subType == 'wisdom-ability-checks' && wisdom_skills.indexOf(skill) !== -1)
+                                    || (modifier.subType == 'charisma-ability-checks' && charisma_skills.indexOf(skill) !== -1)
+                                ) {
+                                    var attributes = {};
+                                    attributes[skill + "_flat"] = Math.floor((Math.floor((total_level - 1) / 4) + 2) / 2);
+                                    Object.assign(all_attributes, attributes);
+                                }
+                            });
+                        }
+                    }
+                });
+
+                var hpModifiers = getObjects(character.modifiers.class, 'type', 'half-proficiency');
+                var hprModifiers = getObjects(character.modifiers.class, 'type', 'half-proficiency-round-up');
+                if(hprModifiers.length > 0) {
+                    hprModifiers.forEach(function(modifier) {
+                        if(modifier.subType == 'initiative') {
+                            var attributes = {};
+                            attributes["initmod"] = Math.ceil((Math.floor((total_level - 1) / 4) + 2) / 2);
+                            Object.assign(all_attributes, attributes);
+                        }
+                    }
+                }
+                else if(hpModifiers.length > 0) {
+                    hpModifiers.forEach(function(modifier) {
+                        if(modifier.subType == 'initiative') {
+                            var attributes = {};
+                            attributes["initmod"] = Math.floor((Math.floor((total_level - 1) / 4) + 2) / 2);
+                            Object.assign(all_attributes, attributes);
+                        }
+                    }
+                }
+
                 // Expertise
                 var exp = getObjects(character, 'type', 'expertise');
                 for(var i in exp) {
@@ -723,6 +790,7 @@
                     'speed': speed,
                     'hp_temp': character.temporaryHitPoints || '',
                     'inspiration': (character.inspiration) ? 'on' : 0,
+                    'alignment': character.alignmentId == null ? '' : alignments[character.alignmentId],
 
                     // Bio Info
                     // 'age': character.age ? character.age : '',
@@ -776,7 +844,7 @@
                     'global_damage_mod_flag': 1,
                     'dtype': 'full',
                     'init_tiebreaker': initTiebreaker ? '@{dexterity}/100' : '',
-                    'jack_of_all_trades': jack
+                    // 'jack_of_all_trades': jack
                 };
 
                 Object.assign(all_attributes, other_attributes);
