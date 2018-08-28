@@ -691,7 +691,7 @@
                             attributes["initmod"] = Math.ceil((Math.floor((total_level - 1) / 4) + 2) / 2);
                             Object.assign(all_attributes, attributes);
                         }
-                    }
+                    });
                 }
                 else if(hpModifiers.length > 0) {
                     hpModifiers.forEach(function(modifier) {
@@ -700,7 +700,7 @@
                             attributes["initmod"] = Math.floor((Math.floor((total_level - 1) / 4) + 2) / 2);
                             Object.assign(all_attributes, attributes);
                         }
-                    }
+                    });
                 }
 
                 // Expertise
