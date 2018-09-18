@@ -1,5 +1,5 @@
 /*
- * Version 0.3.7
+ * Version 0.3.8
  *
  * Made By Robin Kuiper
  * Skype: RobinKuiper.eu
@@ -150,6 +150,17 @@
 
                 // Make Speed String
                 var weightSpeeds = character.race.weightSpeeds;
+                if(weightSpeeds == null) {
+                    weightSpeeds = {
+                        "normal": {
+                            "walk": 30,
+                            "fly": 0,
+                            "burrow": 0,
+                            "swim": 0,
+                            "climb": 0
+                        }
+                    };
+                }
 
                 var speedMods = getObjects(character, 'subType', 'speed');
                 if(speedMods != null) {
@@ -864,12 +875,19 @@
                     hp += total_level * bons.value;
                 });
 
-                createObj('attribute', {
-                    characterid: object.id,
-                    name: 'hp',
-                    current: hp,
-                    max: hp
-                });
+                var hpAttr = findObjs({ type: 'attribute', characterid: object.id, name: 'hp' })[0];
+                if(hpAttr == null) {
+                    createObj('attribute', {
+                        characterid: object.id,
+                        name: 'hp',
+                        current: hp,
+                        max: hp
+                    });
+                }
+                else {
+                    hpAttr.set('current', hp);
+                    hpAttr.set('max', hp);
+                }
 
                 if(class_spells.length > 15 && state[state_name][beyond_caller.id].config.imports.class_spells) {
                     sendChat(script_name, '<div style="'+style+'">Import of <b>' + character.name + '</b> is almost ready.<br><p>There are some more spells than expected, they will be imported over time.</p></div>', null, {noarchive:true});
