@@ -234,145 +234,6 @@
                     }
                 }
 
-                // Import Character Inventory
-                var hasArmor = false;
-                if(state[state_name][beyond_caller.id].config.imports.inventory) {
-                    const inventory = character.inventory;
-                    var prevAdded = [];
-                    if(inventory != null) inventory.forEach(function(item, i) {
-                        var paIndex = prevAdded.filter(function(pAdded) { return pAdded == item.definition.name; }).length;
-                        var row = getRepeatingRowIds('inventory', 'itemname', item.definition.name, paIndex);
-                        prevAdded.push(item.definition.name);
-
-                        var attributes = {};
-                        attributes["repeating_inventory_"+row+"_itemname"] = item.definition.name;
-                        attributes["repeating_inventory_"+row+"_equipped"] = (item.equipped) ? '1' : '0';
-                        attributes["repeating_inventory_"+row+"_itemcount"] = item.quantity;
-                        attributes["repeating_inventory_"+row+"_itemweight"] = item.definition.weight / item.definition.bundleSize;
-                        attributes["repeating_inventory_"+row+"_itemcontent"] = replaceChars(item.definition.description);
-                        var _itemmodifiers = 'Item Type: ' + item.definition.type;
-                        if(typeof item.definition.damage === 'object' && item.definition.type !== 'Ammunition'){
-                            var properties = '';
-                            var finesse = false;
-                            for(var j = 0; j < item.definition.properties.length; j++){
-                                properties += item.definition.properties[j].name + ', ';
-                                //if(item.definition.properties[j].name === 'Finesse'){ finesse = true }
-                            }
-                            attributes["repeating_inventory_"+row+"_itemproperties"] = properties;
-                            attributes["repeating_inventory_"+row+"_hasattack"] = '0';
-                            _itemmodifiers = 'Item Type: ' + item.definition.attackType + ' ' + item.definition.filterType + (item.definition.damage != null ? ', Damage: ' + item.definition.damage.diceString : '') + ', Damage Type: ' + item.definition.damageType + ', Range: ' + item.definition.range + '/' + item.definition.longRange;
-
-                            var magic = 0;
-                            item.definition.grantedModifiers.forEach(function(grantedMod) {
-                                if(grantedMod.type == 'bonus' && grantedMod.subType == 'magic') {
-                                    magic += grantedMod.value;
-                                }
-                            });
-
-                            // Finesse Weapon
-                            var isFinesse = item.definition.properties.filter(function(property) { return property.name == 'Finesse'; }).length > 0;
-                            if(isFinesse && getTotalAbilityScore(character, 2) > getTotalAbilityScore(character, item.definition.attackType)) {
-                                item.definition.attackType = 2;
-                            }
-
-                            // Hexblade's Weapon
-                            var characterValues = getObjects(character.characterValues, 'valueId', item.id);
-                            characterValues.forEach(function(cv) {
-                                if(cv.typeId == 29 && getTotalAbilityScore(character, 6) >= getTotalAbilityScore(character, item.definition.attackType)) {
-                                    item.definition.attackType = 6;
-                                }
-                            });
-
-                            // CREATE ATTACK
-                            var attack = {
-                                name: item.definition.name,
-                                range: item.definition.range + '/' + item.definition.longRange,
-                                attack: {
-                                    attribute: _ABILITY[_ABILITIES[item.definition.attackType]]
-                                },
-                                damage: {
-                                    diceString: item.definition.damage != null ? item.definition.damage.diceString : '',
-                                    type: item.definition.damageType,
-                                    attribute: _ABILITY[_ABILITIES[item.definition.attackType]]
-                                },
-                                description: replaceChars(item.definition.description),
-                                magic: magic
-                            };
-
-                            item.definition.grantedModifiers.forEach(function(grantedMod) {
-                                if(grantedMod.type == 'damage') {
-                                    if(grantedMod.dice != null) {
-                                        attack.damage2 = {
-                                            diceString: grantedMod.dice.diceString,
-                                            type: grantedMod.friendlySubtypeName,
-                                            attribute: grantedMod.statId == null ? '0' : _ABILITY[_ABILITIES[grantedMod.statId]]
-                                        };
-                                    }
-                                }
-                            });
-
-                            var repAttack = createRepeatingAttack(object, attack, {index: paIndex, itemid: row});
-                            Object.assign(all_attributes, repAttack);
-                            // /CREATE ATTACK
-                        }
-                        item.definition.grantedModifiers.forEach(function(grantedMod) {
-                            for(var abilityId in _ABILITIES) {
-                                var ABL = _ABILITIES[abilityId];
-                                if(grantedMod.type == 'set' && grantedMod.subType == _ABILITY[ABL]+'-score') {
-                                    _itemmodifiers += ', '+ucFirst(_ABILITY[ABL])+': '+grantedMod.value;
-                                }
-                            }
-                            if(grantedMod.type == 'bonus' && (grantedMod.subType == 'unarmored-armor-class' || grantedMod.subType == 'armor-class')) {
-                                if(grantedMod.subType == 'armor-class') {
-                                    hasArmor = true;
-                                }
-                                if(item.definition.hasOwnProperty('armorClass')) {
-                                    item.definition.armorClass += grantedMod.value;
-                                }
-                                else {
-                                    _itemmodifiers += ', AC +' + grantedMod.value;
-                                }
-                            }
-                            if(grantedMod.type == 'set' && (grantedMod.subType == 'unarmored-armor-class' || grantedMod.subType == 'armor-class')) {
-                                if(grantedMod.subType == 'armor-class') {
-                                    hasArmor = true;
-                                }
-                                _itemmodifiers += ', AC: ' + grantedMod.value;
-                            }
-                            if(grantedMod.type == 'bonus' && (grantedMod.subType == 'saving-throws')) {
-                                _itemmodifiers += ', Saving Throws +' + grantedMod.value;
-                            }
-                        });
-                        if(item.definition.hasOwnProperty('armorClass')){
-                            _itemmodifiers += ', AC: ' + item.definition.armorClass;
-                            hasArmor = true;
-                        }
-                        attributes["repeating_inventory_"+row+"_itemmodifiers"] = _itemmodifiers;
-                        Object.assign(all_attributes, attributes);
-                    });
-                }
-
-                // If character has unarmored defense, add it to the inventory, so a player can enable/disable it.
-                var unarmored = getObjects(character, 'subType', 'unarmored-armor-class');
-                var x = 0;
-                if(unarmored != null) unarmored.forEach(function(ua, i) {
-                    if(ua.type != 'set') return;
-                    if(ua.value == null) {
-                        ua.value = Math.floor((getTotalAbilityScore(character, ua.statId) - 10) / 2);
-                    }
-
-                    var row = getRepeatingRowIds('inventory', 'itemname', 'Unarmored Defense')[x];
-
-                    var attributes = {}
-                    attributes["repeating_inventory_"+row+"_itemname"] = 'Unarmored Defense';
-                    attributes["repeating_inventory_"+row+"_equipped"] = !hasArmor ? '1' : '0';
-                    attributes["repeating_inventory_"+row+"_itemcount"] = 1;
-                    attributes["repeating_inventory_"+row+"_itemmodifiers"] = 'AC: '+ua.value;
-                    Object.assign(all_attributes, attributes);
-
-                    x++;
-                });
-
                 // Languages
                 if(state[state_name][beyond_caller.id].config.imports.languages) {
                     var languages = getObjects(character, 'type', 'language');
@@ -643,6 +504,168 @@
                         }
                     });
                 }
+
+                // Import Character Inventory
+                var hasArmor = false;
+                if(state[state_name][beyond_caller.id].config.imports.inventory) {
+                    const inventory = character.inventory;
+                    var prevAdded = [];
+                    if(inventory != null) inventory.forEach(function(item, i) {
+                        var paIndex = prevAdded.filter(function(pAdded) { return pAdded == item.definition.name; }).length;
+                        var row = getRepeatingRowIds('inventory', 'itemname', item.definition.name, paIndex);
+                        prevAdded.push(item.definition.name);
+
+                        var attributes = {};
+                        attributes["repeating_inventory_"+row+"_itemname"] = item.definition.name;
+                        attributes["repeating_inventory_"+row+"_equipped"] = (item.equipped) ? '1' : '0';
+                        attributes["repeating_inventory_"+row+"_itemcount"] = item.quantity;
+                        attributes["repeating_inventory_"+row+"_itemweight"] = item.definition.weight / item.definition.bundleSize;
+                        attributes["repeating_inventory_"+row+"_itemcontent"] = replaceChars(item.definition.description);
+                        var _itemmodifiers = 'Item Type: ' + item.definition.type;
+                        if(typeof item.definition.damage === 'object' && item.definition.type !== 'Ammunition') {
+                            var properties = '';
+                            var finesse = false;
+                            for(var j = 0; j < item.definition.properties.length; j++){
+                                properties += item.definition.properties[j].name + ', ';
+                                //if(item.definition.properties[j].name === 'Finesse'){ finesse = true }
+                            }
+                            attributes["repeating_inventory_"+row+"_itemproperties"] = properties;
+                            attributes["repeating_inventory_"+row+"_hasattack"] = '0';
+                            _itemmodifiers = 'Item Type: ' + item.definition.attackType + ' ' + item.definition.filterType + (item.definition.damage != null ? ', Damage: ' + item.definition.damage.diceString : '') + ', Damage Type: ' + item.definition.damageType + ', Range: ' + item.definition.range + '/' + item.definition.longRange;
+
+                            var magic = 0;
+                            item.definition.grantedModifiers.forEach(function(grantedMod) {
+                                if(grantedMod.type == 'bonus' && grantedMod.subType == 'magic') {
+                                    magic += grantedMod.value;
+                                }
+                            });
+
+                            // Finesse Weapon
+                            var isFinesse = item.definition.properties.filter(function(property) { return property.name == 'Finesse'; }).length > 0;
+                            if(isFinesse && getTotalAbilityScore(character, 2) > getTotalAbilityScore(character, item.definition.attackType)) {
+                                item.definition.attackType = 2;
+                            }
+
+                            // Hexblade's Weapon
+                            var characterValues = getObjects(character.characterValues, 'valueId', item.id);
+                            characterValues.forEach(function(cv) {
+                                if(cv.typeId == 29 && getTotalAbilityScore(character, 6) >= getTotalAbilityScore(character, item.definition.attackType)) {
+                                    item.definition.attackType = 6;
+                                }
+                            });
+
+                            // CREATE ATTACK
+                            var attack = {
+                                name: item.definition.name,
+                                range: item.definition.range + '/' + item.definition.longRange,
+                                attack: {
+                                    attribute: _ABILITY[_ABILITIES[item.definition.attackType]]
+                                },
+                                damage: {
+                                    diceString: item.definition.damage != null ? item.definition.damage.diceString : '',
+                                    type: item.definition.damageType,
+                                    attribute: _ABILITY[_ABILITIES[item.definition.attackType]]
+                                },
+                                description: replaceChars(item.definition.description),
+                                magic: magic
+                            };
+
+                            item.definition.grantedModifiers.forEach(function(grantedMod) {
+                                if(grantedMod.type == 'damage') {
+                                    if(grantedMod.dice != null) {
+                                        attack.damage2 = {
+                                            diceString: grantedMod.dice.diceString,
+                                            type: grantedMod.friendlySubtypeName,
+                                            attribute: grantedMod.statId == null ? '0' : _ABILITY[_ABILITIES[grantedMod.statId]]
+                                        };
+                                    }
+                                }
+                            });
+
+                            var repAttack = createRepeatingAttack(object, attack, {index: paIndex, itemid: row});
+                            Object.assign(all_attributes, repAttack);
+                            // /CREATE ATTACK
+                        }
+                        item.definition.grantedModifiers.forEach(function(grantedMod) {
+                            for(var abilityId in _ABILITIES) {
+                                var ABL = _ABILITIES[abilityId];
+                                if(grantedMod.type == 'set' && grantedMod.subType == _ABILITY[ABL]+'-score') {
+                                    _itemmodifiers += ', '+ucFirst(_ABILITY[ABL])+': '+grantedMod.value;
+                                }
+                            }
+                            if(grantedMod.type == 'bonus' && (grantedMod.subType == 'unarmored-armor-class' || grantedMod.subType == 'armor-class')) {
+                                if(grantedMod.subType == 'armor-class') {
+                                    hasArmor = true;
+                                }
+                                if(item.definition.hasOwnProperty('armorClass')) {
+                                    item.definition.armorClass += grantedMod.value;
+                                }
+                                else {
+                                    _itemmodifiers += ', AC +' + grantedMod.value;
+                                }
+                            }
+                            if(grantedMod.type == 'set' && (grantedMod.subType == 'unarmored-armor-class' || grantedMod.subType == 'armor-class')) {
+                                if(grantedMod.subType == 'armor-class') {
+                                    hasArmor = true;
+                                }
+                                _itemmodifiers += ', AC: ' + grantedMod.value;
+                            }
+                            if(grantedMod.type == 'bonus' && (grantedMod.subType == 'saving-throws')) {
+                                _itemmodifiers += ', Saving Throws +' + grantedMod.value;
+                            }
+                        });
+                        if(item.definition.hasOwnProperty('armorClass')){
+                            _itemmodifiers += ', AC: ' + item.definition.armorClass;
+                            hasArmor = true;
+                        }
+                        attributes["repeating_inventory_"+row+"_itemmodifiers"] = _itemmodifiers;
+                        Object.assign(all_attributes, attributes);
+                    });
+                }
+
+                // If character has unarmored defense, add it to the inventory, so a player can enable/disable it.
+                var unarmored = getObjects(character, 'subType', 'unarmored-armor-class');
+                var x = 0;
+                if(unarmored != null) unarmored.forEach(function(ua, i) {
+                    if(ua.type != 'set') return;
+                    if(ua.value == null) {
+                        ua.value = Math.floor((getTotalAbilityScore(character, ua.statId) - 10) / 2);
+                    }
+
+                    var row = getRepeatingRowIds('inventory', 'itemname', 'Unarmored Defense')[x];
+
+                    var name = 'Unarmored Defense';
+                    var modifiers = '';
+
+                    if(ua.componentTypeId == 306912077) { // Integrated Protection (Armor Type Option)
+                        row = getRepeatingRowIds('inventory', 'itemname', 'Integrated Potection', 0);
+
+                        name = 'Integrated Protection';
+                        hasArmor = false;
+                        if(ua.value == 6) {
+                            modifiers = 'Item Type: Heavy Armor';
+                            ua.value = 10 + parseInt(ua.value);
+                        }
+                        else if(ua.value == 3) {
+                            modifiers == 'Item Type: Medium Armor'
+                            ua.value = 10 + parseInt(ua.value);
+                        }
+                        ua.value += Math.floor((total_level - 1) / 4) + 2;
+                    }
+
+                    modifiers += (modifiers == '' ? '' : ', ') + 'AC: '+ua.value
+
+                    var attributes = {}
+                    attributes["repeating_inventory_"+row+"_itemname"] = name;
+                    attributes["repeating_inventory_"+row+"_equipped"] = !hasArmor ? '1' : '0';
+                    attributes["repeating_inventory_"+row+"_itemcount"] = 1;
+                    attributes["repeating_inventory_"+row+"_itemmodifiers"] = modifiers;
+                    Object.assign(all_attributes, attributes);
+
+                    if(ua.componentTypeId == 306912077) { hasArmor = true; }
+
+                    x++;
+                });
 
                 if(character.spells.race.length > 0) {
                     var spells = character.spells.race;
