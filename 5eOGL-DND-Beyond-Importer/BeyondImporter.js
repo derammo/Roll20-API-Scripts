@@ -1,5 +1,5 @@
 /*
- * Version 0.3.8
+ * Version 0.3.9
  *
  * Made By Robin Kuiper
  * Skype: RobinKuiper.eu
@@ -20,12 +20,13 @@
 (function() {
     const _ABILITIES = {1:'STR',2:'DEX',3:'CON',4:'INT',5:'WIS',6:'CHA'};
     const _ABILITY = {'STR': 'strength', 'DEX': 'dexterity', 'CON': 'constitution', 'INT': 'intelligence', 'WIS': 'wisdom', 'CHA': 'charisma'}
+    const abilities = ['STR','DEX','CON','INT','WIS','CHA'];
     const alignments = ['','Lawful Good', 'Neutral Good', 'Chaotic Good', 'Lawful Neutral', 'Neutral', 'Chaotic Neutral', 'Lawful Evil', 'Neutral Evil', 'Chaotic Evil'];
     const skills = ['acrobatics', 'animal_handling', 'arcana', 'athletics', 'deception', 'history', 'insight', 'intimidation', 'investigation', 'medicine', 'nature', 'perception', 'performance', 'persuasion', 'religion', 'sleight_of_hand', 'stealth', 'survival'];
     const strength_skills = ['athletics'];
     const dexterity_skills = ['acrobatics', 'sleight of hand', 'stealth'];
     const intelligence_skills = ['arcana','history','investigation','nature','religion'];
-    const wisdom_skills = ['animal_handling','medicine','perception','survival'];
+    const wisdom_skills = ['animal_handling','insight','medicine','perception','survival'];
     const charisma_skills = ['deception','intimidation','performance','persuasion']
 
     let class_spells = [];
@@ -48,7 +49,7 @@
         if(debug) { sendChat(script_name, script_name + ' Ready!', null, {noarchive:true}); }
     });
 
-    on('chat:message', function(msg) {
+    on('chat:message', (msg) => {
         if (msg.type != 'api') return;
 
         // Split the message into command and argument(s)
@@ -164,7 +165,7 @@
 
                 let speedMods = getObjects(character, 'subType', 'speed');
                 if(speedMods != null) {
-                    speedMods.forEach(function(speedMod) {
+                    speedMods.forEach((speedMod) => {
                         if(speedMod.type == 'set') {
                             weightSpeeds.normal.walk = (speedMod.value > weightSpeeds.normal.walk ? speedMod.value : weightSpeeds.normal.walk);
                         }
@@ -173,7 +174,7 @@
 
                 speedMods = getObjects(character, 'subType', 'innate-speed-flying');
                 if(speedMods != null) {
-                    speedMods.forEach(function(speedMod) {
+                    speedMods.forEach((speedMod) => {
                         if(speedMod.type == 'set' && speedMod.id.indexOf('spell') == -1) {
                             if(speedMod.value == null) speedMod.value = weightSpeeds.normal.walk;
                             weightSpeeds.normal.fly = (speedMod.value > weightSpeeds.normal.fly ? speedMod.value : weightSpeeds.normal.fly);
@@ -183,7 +184,7 @@
 
                 speedMods = getObjects(character, 'subType', 'innate-speed-swimming');
                 if(speedMods != null) {
-                    speedMods.forEach(function(speedMod) {
+                    speedMods.forEach((speedMod) => {
                         if(speedMod.type == 'set' && speedMod.id.indexOf('spell') == -1) {
                             if(speedMod.value == null) speedMod.value = weightSpeeds.normal.walk;
                             weightSpeeds.normal.swim = (speedMod.value > weightSpeeds.normal.swim ? speedMod.value : weightSpeeds.normal.swim);
@@ -193,7 +194,7 @@
 
                 speedMods = getObjects(character, 'subType', 'innate-speed-climbing');
                 if(speedMods != null) {
-                    speedMods.forEach(function(speedMod) {
+                    speedMods.forEach((speedMod) => {
                         if(speedMod.type == 'set' && speedMod.id.indexOf('spell') == -1) {
                             if(speedMod.value == null) speedMod.value = weightSpeeds.normal.walk;
                             weightSpeeds.normal.climb = (speedMod.value > weightSpeeds.normal.climb ? speedMod.value : weightSpeeds.normal.climb);
@@ -203,7 +204,7 @@
 
                 speedMods = getObjects(character, 'subType', 'unarmored-movement');
                 if(speedMods != null) {
-                    speedMods.forEach(function(speedMod) {
+                    speedMods.forEach((speedMod) => {
                         if(speedMod.type == 'bonus') {
                             speedMod.value = isNaN(weightSpeeds.normal.walk + speedMod.value) ? 0 : speedMod.value;
                             weightSpeeds.normal.walk += speedMod.value;
@@ -216,7 +217,7 @@
 
                 speedMods = getObjects(character, 'subType', 'speed');
                 if(speedMods != null) {
-                    speedMods.forEach(function(speedMod) {
+                    speedMods.forEach((speedMod) => {
                         if(speedMod.type == 'bonus') {
                             speedMod.value = isNaN(weightSpeeds.normal.walk + speedMod.value) ? 0 : speedMod.value;
                             weightSpeeds.normal.walk += speedMod.value;
@@ -234,13 +235,16 @@
                     }
                 }
 
+                let weapon_critical_range = 20;
+                let critical_range = 20;
+
                 // Languages
                 if(state[state_name][beyond_caller.id].config.imports.languages) {
                     let languages = getObjects(character, 'type', 'language');
                     if(languageGrouping) {
                         let langs = [];
                         if(languages != null) {
-                            languages.forEach(function(language) {
+                            languages.forEach((language) => {
                                 langs.push(language.friendlySubtypeName);
                             });
                         }
@@ -256,7 +260,7 @@
                     }
                     else {
                         if(languages != null) {
-                            languages.forEach(function(language) {
+                            languages.forEach((language) => {
                                 let row = getRepeatingRowIds('proficiencies', 'name', language.friendlySubtypeName)[0];
                                 let attributes = {};
                                 attributes["repeating_proficiencies_"+row+"_name"] = language.friendlySubtypeName;
@@ -274,7 +278,7 @@
                 let proficiencies = getObjects(character, 'type', 'proficiency');
                 let profs = [];
                 if(proficiencies != null) {
-                    proficiencies.forEach(function(prof) {
+                    proficiencies.forEach((prof) => {
                         let skill = prof.subType.replace(/-/g, '_');
                         if(skills.includes(skill)){
                             let attributes = {}
@@ -323,7 +327,7 @@
                         Object.assign(all_attributes, attrs);
                     }
                     // Feats
-                    character.feats.forEach(function(feat, fi) {
+                    character.feats.forEach((feat, fi) => {
                         let t = {
                             name: feat.definition.name,
                             description: replaceChars(feat.definition.description),
@@ -337,14 +341,14 @@
                     // Race Features
                     if(character.race.racialTraits != null) {
                         let ti = 0;
-                        character.race.racialTraits.forEach(function(trait) {
+                        character.race.racialTraits.forEach((trait) => {
                             if(['Languages', 'Darkvision', 'Superior Darkvision', 'Skills', 'Ability Score Increase', 'Feat', 'Age', 'Alignment', 'Size', 'Speed', 'Skill Versatility', 'Dwarven Combat Training', 'Keen Senses', 'Elf Weapon Training', 'Extra Language', 'Tool Proficiency'].indexOf(trait.definition.name) !== -1) {
                                 return;
                             }
 
                             let description = '';
                             if(trait.options != null) {
-                                trait.options.forEach(function(option) {
+                                trait.options.forEach((option) => {
                                     description += option.name + '\n';
                                     description += (option.description !== '') ? option.description + '\n\n' : '\n';
                                 });
@@ -363,7 +367,7 @@
                             Object.assign(all_attributes, attrs);
 
                             let spells = getFeatureSpells(character, trait.id, 'race');
-                            spells.forEach(function(spell) {
+                            spells.forEach((spell) => {
                                 spell.spellCastingAbility = _ABILITIES[spell.spellCastingAbilityId];
                                 class_spells.push(spell);
                             });
@@ -377,7 +381,7 @@
                 let multiclass_level = 0;
                 let total_level = 0;
                 if(state[state_name][beyond_caller.id].config.imports.classes) {
-                    character.classes.forEach(function(current_class, i) {
+                    character.classes.forEach((current_class, i) => {
                         total_level += current_class.level;
 
                         if(!current_class.isStartingClass){
@@ -392,7 +396,7 @@
                         }
 
                         // Set Pact Magic as class resource
-                        if(current_class.definition.name.toLowerCase() === 'warlock'){
+                        if(current_class.definition.name.toLowerCase() === 'warlock') {
                             let attributes = {}
                             attributes['other_resource_name'] = 'Pact Magic';
                             attributes['other_resource_max'] = getPactMagicSlots(current_class.level);
@@ -400,9 +404,22 @@
                             Object.assign(all_attributes, attributes);
                         }
 
+                        if(current_class.definition.name.toLowerCase() === 'fighter' && current_class.subclassDefinition != null) {
+                            if(current_class.subclassDefinition.name.toLowerCase() == 'champion') {
+                                current_class.subclassDefinition.classFeatures.forEach((feature, i) => {
+                                    if(feature.id == 215 && current_class.level >= feature.requiredLevel) { // improved critical
+                                        critical_range = Math.min(19, critical_range);
+                                    }
+                                    if(feature.id == 218 && current_class.level >= feature.requiredLevel) {
+                                        critical_range = Math.min(18, critical_range);
+                                    }
+                                });
+                            }
+                        }
+
                         if(state[state_name][beyond_caller.id].config.imports.class_traits){
                             let ti = 0;
-                            current_class.definition.classFeatures.forEach(function(trait) {
+                            current_class.definition.classFeatures.forEach((trait) => {
                                 if(['Spellcasting', 'Divine Domain', 'Ability Score Improvement', 'Bonus Cantrip', 'Proficiencies', 'Hit Points', 'Arcane Tradition', 'Otherworldly Patron', 'Pact Magic', 'Expanded Spell List', 'Ranger Archetype', 'Druidic', 'Druid Circle', 'Sorcerous Origin', 'Monastic Tradition', 'Bardic College', 'Expertise', 'Roguish Archetype', 'Sacred Oath', 'Oath Spells', 'Martial Archetype'].indexOf(trait.name) !== -1) {
                                     return;
                                 }
@@ -426,13 +443,13 @@
                                 Object.assign(all_attributes, createRepeatingTrait(object, t, ti));
 
                                 let spells = getFeatureSpells(character, trait.id, 'class');
-                                spells.forEach(function(spell) {
+                                spells.forEach((spell) => {
                                     spell.spellCastingAbility = _ABILITIES[spell.spellCastingAbilityId];
                                     class_spells.push(spell);
                                 });
 
                                 if(trait.name == 'Metamagic') {
-                                    character.choices.class.forEach(function(option) {
+                                    character.choices.class.forEach((option) => {
                                         if(option.type == 3 && (option.optionValue >= 106 && option.optionValue <= 113)) {
                                             let item = getObjects(option.options, 'id', option.optionValue);
 
@@ -456,7 +473,7 @@
 
                             if(current_class.subclassDefinition != null) {
                                 let ti = 0;
-                                current_class.subclassDefinition.classFeatures.forEach(function(trait) {
+                                current_class.subclassDefinition.classFeatures.forEach((trait) => {
                                     if(['Spellcasting', 'Bonus Proficiency', 'Divine Domain', 'Ability Score Improvement', 'Bonus Cantrip', 'Proficiencies', 'Hit Points', 'Arcane Tradition', 'Otherworldly Patron', 'Pact Magic', 'Expanded Spell List', 'Ranger Archetype', 'Druidic', 'Druid Circle', 'Sorcerous Origin', 'Monastic Tradition', 'Bardic College', 'Expertise', 'Roguish Archetype', 'Sacred Oath', 'Oath Spells', 'Martial Archetype'].indexOf(trait.name) !== -1) {
                                         return;
                                     }
@@ -480,7 +497,7 @@
                                     Object.assign(all_attributes, createRepeatingTrait(object, t, ti));
 
                                     let spells = getFeatureSpells(character, trait.id, 'class');
-                                    spells.forEach(function(spell) {
+                                    spells.forEach((spell) => {
                                         spell.spellCastingAbility = _ABILITIES[spell.spellCastingAbilityId];
                                         class_spells.push(spell);
                                     });
@@ -495,7 +512,7 @@
                             for(let i in character.classSpells) {
                                 let spells = character.classSpells[i];
                                 if(character.classSpells[i].characterClassId == current_class.id) {
-                                    character.classSpells[i].spells.forEach(function(spell) {
+                                    character.classSpells[i].spells.forEach((spell) => {
                                         spell.spellCastingAbility = _ABILITIES[current_class.definition.spellCastingAbilityId];
                                         class_spells.push(spell);
                                     });
@@ -510,8 +527,8 @@
                 if(state[state_name][beyond_caller.id].config.imports.inventory) {
                     const inventory = character.inventory;
                     let prevAdded = [];
-                    if(inventory != null) inventory.forEach(function(item, i) {
-                        let paIndex = prevAdded.filter(function(pAdded) { return pAdded == item.definition.name; }).length;
+                    if(inventory != null) inventory.forEach((item, i) => {
+                        let paIndex = prevAdded.filter((pAdded) => { return pAdded == item.definition.name; }).length;
                         let row = getRepeatingRowIds('inventory', 'itemname', item.definition.name, paIndex);
                         prevAdded.push(item.definition.name);
 
@@ -519,58 +536,116 @@
                         attributes["repeating_inventory_"+row+"_itemname"] = item.definition.name;
                         attributes["repeating_inventory_"+row+"_equipped"] = (item.equipped) ? '1' : '0';
                         attributes["repeating_inventory_"+row+"_itemcount"] = item.quantity;
-                        attributes["repeating_inventory_"+row+"_itemweight"] = item.definition.weight / item.definition.bundleSize;
+                        attributes["repeating_inventory_"+row+"_itemweight"] = (item.definition.bundleSize != 0 ? item.definition.weight / item.definition.bundleSize : item.definition.weight);
                         attributes["repeating_inventory_"+row+"_itemcontent"] = replaceChars(item.definition.description);
                         let _itemmodifiers = 'Item Type: ' + item.definition.type;
                         if(typeof item.definition.damage === 'object' && item.definition.type !== 'Ammunition') {
                             let properties = '';
                             let finesse = false;
-                            for(let j = 0; j < item.definition.properties.length; j++){
-                                properties += item.definition.properties[j].name + ', ';
-                                //if(item.definition.properties[j].name === 'Finesse'){ finesse = true }
-                            }
+                            let twohanded = false;
+                            let ranged = false;
+                            let hasOffhand = false;
+                            let isOffhand = false;
+                            item.definition.properties.forEach((prop) => {
+                                if(prop.name == 'Two-Handed') {
+                                    twohanded = true;
+                                }
+                                if(prop.name == 'Range') {
+                                    ranged = true;
+                                }
+                                if(prop.name == 'Finesse') {
+                                    finesse = true;
+                                }
+
+                                properties += prop.name + ', ';
+                            });
+
+                            let cv = getObjects(character.characterValues, 'valueTypeId', item.entityTypeId);
+                            cv.forEach((v) => {
+                                if(v.typeId == 18 && v.value === true) {
+                                    hasOffhand = true;
+                                    if(v.valueId == item.id) {
+                                        isOffhand = true;
+                                    }
+                                }
+                            });
+
                             attributes["repeating_inventory_"+row+"_itemproperties"] = properties;
                             attributes["repeating_inventory_"+row+"_hasattack"] = '0';
                             _itemmodifiers = 'Item Type: ' + item.definition.attackType + ' ' + item.definition.filterType + (item.definition.damage != null ? ', Damage: ' + item.definition.damage.diceString : '') + ', Damage Type: ' + item.definition.damageType + ', Range: ' + item.definition.range + '/' + item.definition.longRange;
 
                             let magic = 0;
-                            item.definition.grantedModifiers.forEach(function(grantedMod) {
+                            item.definition.grantedModifiers.forEach((grantedMod) => {
                                 if(grantedMod.type == 'bonus' && grantedMod.subType == 'magic') {
                                     magic += grantedMod.value;
                                 }
                             });
 
                             // Finesse Weapon
-                            let isFinesse = item.definition.properties.filter(function(property) { return property.name == 'Finesse'; }).length > 0;
+                            let isFinesse = item.definition.properties.filter((property) => { return property.name == 'Finesse'; }).length > 0;
                             if(isFinesse && getTotalAbilityScore(character, 2) > getTotalAbilityScore(character, item.definition.attackType)) {
                                 item.definition.attackType = 2;
                             }
 
                             // Hexblade's Weapon
                             let characterValues = getObjects(character.characterValues, 'valueId', item.id);
-                            characterValues.forEach(function(cv) {
+                            characterValues.forEach((cv) => {
                                 if(cv.typeId == 29 && getTotalAbilityScore(character, 6) >= getTotalAbilityScore(character, item.definition.attackType)) {
                                     item.definition.attackType = 6;
                                 }
                             });
 
+                            let fightingStyles = getObjects(character.classes, 'name', 'Fighting Style');
+                            let gwf = false;
+                            let atkmod = 0;
+                            let dmgmod = 0;
+                            let hasTWFS = false;
+                            fightingStyles.forEach((fS) => {
+                                let fsOpts = getObjects(character.choices, 'componentId', fS.id);
+                                fsOpts.forEach((fsOpt) => {
+                                    if(fsOpt.optionValue != null) {
+                                        let selOpts = getObjects(fsOpt.options, 'id', fsOpt.optionValue);
+                                        selOpts.forEach((selOpt) => {
+                                            if(selOpt.label == 'Great Weapon Fighting' && twohanded) {
+                                                gwf = true;
+                                            }
+                                            if(selOpt.label == 'Archery' && ranged) {
+                                                atkmod += 2;
+                                            }
+                                            if(selOpt.label == 'Dueling' && !hasOffhand) {
+                                                dmgmod += 2;
+                                            }
+                                            if(selOpt.label == 'Two-Weapon Fighting') {
+                                                hasTWFS = true;
+                                            }
+                                        });
+                                    }
+                                });
+                            });
+
+                            let dmgattr = _ABILITY[_ABILITIES[item.definition.attackType]];
+                            if(!hasTWFS && isOffhand) dmgattr = '0';
+
                             // CREATE ATTACK
                             let attack = {
                                 name: item.definition.name,
-                                range: item.definition.range + '/' + item.definition.longRange,
+                                range: item.definition.range + (item.definition.range != item.definition.longRange ? '/' + item.definition.longRange : '') + 'ft.',
                                 attack: {
-                                    attribute: _ABILITY[_ABILITIES[item.definition.attackType]]
+                                    attribute: _ABILITY[_ABILITIES[item.definition.attackType]],
+                                    mod: atkmod
                                 },
                                 damage: {
-                                    diceString: item.definition.damage != null ? item.definition.damage.diceString : '',
+                                    diceString: item.definition.damage != null ? item.definition.damage.diceString + (gwf ? 'ro<2' : '') : '',
                                     type: item.definition.damageType,
-                                    attribute: _ABILITY[_ABILITIES[item.definition.attackType]]
+                                    attribute: dmgattr,
+                                    mod: dmgmod
                                 },
                                 description: replaceChars(item.definition.description),
-                                magic: magic
+                                magic: magic,
+                                critrange: Math.min(weapon_critical_range, critical_range)
                             };
 
-                            item.definition.grantedModifiers.forEach(function(grantedMod) {
+                            item.definition.grantedModifiers.forEach((grantedMod) => {
                                 if(grantedMod.type == 'damage') {
                                     if(grantedMod.dice != null) {
                                         attack.damage2 = {
@@ -586,7 +661,7 @@
                             Object.assign(all_attributes, repAttack);
                             // /CREATE ATTACK
                         }
-                        item.definition.grantedModifiers.forEach(function(grantedMod) {
+                        item.definition.grantedModifiers.forEach((grantedMod) => {
                             for(let abilityId in _ABILITIES) {
                                 let ABL = _ABILITIES[abilityId];
                                 if(grantedMod.type == 'set' && grantedMod.subType == _ABILITY[ABL]+'-score') {
@@ -607,6 +682,10 @@
                             if(grantedMod.type == 'set' && (grantedMod.subType == 'unarmored-armor-class' || grantedMod.subType == 'armor-class')) {
                                 if(grantedMod.subType == 'armor-class') {
                                     hasArmor = true;
+                                    let aac = getObjects(character, 'subType', 'armored-armor-class');
+                                    aac.forEach((aacb) => {
+                                        grantedMod.value = parseInt(grantedMod.value) + parseInt(aacb.value);
+                                    });
                                 }
                                 _itemmodifiers += ', AC: ' + grantedMod.value;
                             }
@@ -615,7 +694,12 @@
                             }
                         });
                         if(item.definition.hasOwnProperty('armorClass')){
-                            _itemmodifiers += ', AC: ' + item.definition.armorClass;
+                            let aac = getObjects(character, 'subType', 'armored-armor-class');
+                            let ac = item.definition.armorClass;
+                            aac.forEach((aacb) => {
+                                ac = parseInt(ac) + parseInt(aacb.value);
+                            });
+                            _itemmodifiers += ', AC: ' + ac;
                             hasArmor = true;
                         }
                         attributes["repeating_inventory_"+row+"_itemmodifiers"] = _itemmodifiers;
@@ -626,7 +710,7 @@
                 // If character has unarmored defense, add it to the inventory, so a player can enable/disable it.
                 let unarmored = getObjects(character, 'subType', 'unarmored-armor-class');
                 let x = 0;
-                if(unarmored != null) unarmored.forEach(function(ua, i) {
+                if(unarmored != null) unarmored.forEach((ua, i) => {
                     if(ua.type != 'set') return;
                     if(ua.value == null) {
                         ua.value = Math.floor((getTotalAbilityScore(character, ua.statId) - 10) / 2);
@@ -669,20 +753,19 @@
 
                 if(character.spells.race.length > 0) {
                     let spells = character.spells.race;
-                    spells.forEach(function(spell) {
+                    spells.forEach((spell) => {
                         spell.spellCastingAbility = _ABILITIES[spell.spellCastingAbilityId];
                         class_spells.push(spell);
                     });
                 }
 
-                let proficiencies = getObjects(character, 'type', 'proficiency');
-                skills.forEach(function(skill) {
+                skills.forEach((skill) => {
                     let skill_prof = getObjects(proficiencies, 'subType', skill.replace(/_/g, '-'));
                     if(skill_prof.length == 0) {
                         let hpModifiers = getObjects(character.modifiers.class, 'type', 'half-proficiency');
                         let hprModifiers = getObjects(character.modifiers.class, 'type', 'half-proficiency-round-up');
                         if(hprModifiers.length > 0) {
-                            hprModifiers.forEach(function(modifier) {
+                            hprModifiers.forEach((modifier) => {
                                 if(
                                     modifier.subType == 'ability-checks'
                                     || (modifier.subType == 'strength-ability-checks' && strength_skills.indexOf(skill) !== -1)
@@ -698,7 +781,7 @@
                             });
                         }
                         else if(hpModifiers.length > 0) {
-                            hpModifiers.forEach(function(modifier) {
+                            hpModifiers.forEach((modifier) => {
                                 if(
                                     modifier.subType == 'ability-checks'
                                     || (modifier.subType == 'strength-ability-checks' && strength_skills.indexOf(skill) !== -1)
@@ -716,10 +799,22 @@
                     }
                 });
 
+                attributes = {};
+                abilities.forEach((ability) => {
+                    let abl = _ABILITY[ability];
+                    let saves = getObjects(character, 'subType', abl+'-saving-throws');
+                    saves.forEach((save) => {
+                        if(save.type == 'proficiency') {
+                            attributes[abl + '_save_prof'] = "(@{pb})";
+                        }
+                    });
+                });
+                Object.assign(all_attributes, attributes);
+
                 let hpModifiers = getObjects(character.modifiers.class, 'type', 'half-proficiency');
                 let hprModifiers = getObjects(character.modifiers.class, 'type', 'half-proficiency-round-up');
                 if(hprModifiers.length > 0) {
-                    hprModifiers.forEach(function(modifier) {
+                    hprModifiers.forEach((modifier) => {
                         if(modifier.subType == 'initiative') {
                             let attributes = {};
                             attributes["initmod"] = Math.ceil((Math.floor((total_level - 1) / 4) + 2) / 2);
@@ -728,7 +823,7 @@
                     });
                 }
                 else if(hpModifiers.length > 0) {
-                    hpModifiers.forEach(function(modifier) {
+                    hpModifiers.forEach((modifier) => {
                         if(modifier.subType == 'initiative') {
                             let attributes = {};
                             attributes["initmod"] = Math.floor((Math.floor((total_level - 1) / 4) + 2) / 2);
@@ -761,11 +856,11 @@
 
                 // Adhoc Expertise
                 let characterValues = getObjects(character.characterValues, 'typeId', 26);
-                characterValues.forEach(function(cv) {
+                characterValues.forEach((cv) => {
                     let attributes = {};
                     if(cv.value == 4) {
                         let objs = getObjects(character, 'type', 'proficiency');
-                        objs.forEach(function(obj) {
+                        objs.forEach((obj) => {
                             if(cv.valueId == obj.entityId && cv.valueTypeId == obj.entityTypeId) {
                                 let type = obj.subType.replace(/-/g, '_');
                                 if(skills.includes(type)){
@@ -781,7 +876,7 @@
                 let bonuses = getObjects(character, 'type', 'bonus');
                 let bonus_attributes = {};
                 if(state[state_name][beyond_caller.id].config.imports.bonuses){
-                    bonuses.forEach(function(bonus){
+                    bonuses.forEach((bonus) => {
                         if(!bonus.id.includes('spell')){
                             switch(bonus.subType){
                                 default:
@@ -793,6 +888,47 @@
                             }
                         }
                     })
+                }
+
+                // Initiative Style
+                let init_style = '@{d20}';
+                let init_mods = getObjects(character.modifiers, 'subType', 'initiative');
+                let initadv = false;
+                let initdis = false;
+                init_mods.forEach((mod) => {
+                    if(mod.type == 'advantage') {
+                        initadv = true;
+                    }
+                    else {
+                        initdis = true;
+                    }
+                });
+                if(initadv && !initdis) init_style = '{@{d20},@{d20}}kh1';
+                if(!initadv && initdis) init_style = '{@{d20},@{d20}}kl1';
+
+                // Saving Throw Bonuses
+                let stBonuses = getObjects(character.modifiers, 'subType', 'saving-throws');
+                let stBonTotals = [0,0,0,0,0,0,0];
+                stBonuses.forEach((bonus) => {
+                    if(bonus.statId != null) {
+                        stBonTotals[0] += Math.floor((getTotalAbilityScore(character, bonus.statId) - 10) / 2);
+                    }
+                    if(bonus.value != null) {
+                        stBonTotals[0] += bonus.value;
+                    }
+                });
+                for(let i in _ABILITIES) {
+                    let abl = _ABILITY[_ABILITIES[i]];
+                    let stBonuses = getObjects(character.modifiers, 'subType', abl+'-saving-throws');
+                    let stBonTotals = [0,0,0,0,0,0,0];
+                    stBonuses.forEach((bonus) => {
+                        if(bonus.statId != null) {
+                            stBonTotals[parseInt(i)] += Math.floor((getTotalAbilityScore(character, bonus.statId) - 10) / 2);
+                        }
+                        if(bonus.value != null) {
+                            stBonTotals[parseInt(i)] += bonus.value;
+                        }
+                    });
                 }
 
                 let contacts = '',
@@ -849,6 +985,15 @@
                     'wisdom_base': getTotalAbilityScore(character, 5),
                     'charisma_base': getTotalAbilityScore(character, 6),
 
+                    // Saving Throw Bonuses
+                    'globalsavemod': stBonTotals[0],
+                    'strength_save_mod': stBonTotals[1],
+                    'dexterity_save_mod': stBonTotals[2],
+                    'constitution_save_mod': stBonTotals[3],
+                    'intelligence_save_mod': stBonTotals[4],
+                    'wisdom_save_mod': stBonTotals[5],
+                    'charisma_save_mod': stBonTotals[6],
+
                     // Traits
                     'personality_traits': character.traits.personalityTraits,
                     'options-flag-personality': '0',
@@ -878,6 +1023,7 @@
                     'global_damage_mod_flag': 1,
                     'dtype': 'full',
                     'init_tiebreaker': initTiebreaker ? '@{dexterity}/100' : '',
+                    'initiative_style': init_style,
                     // 'jack_of_all_trades': jack
                 };
 
@@ -887,14 +1033,14 @@
                 setAttrs(object.id, all_attributes);
 
                 if(state[state_name][beyond_caller.id].config.imports.class_spells) {
-                    onSheetWorkerCompleted(function() {
+                    onSheetWorkerCompleted(() => {
                         importSpells(character, class_spells)
                     });
                 }
 
                 let hp = Math.floor(character.baseHitPoints + ( total_level * Math.floor( ( ( getTotalAbilityScore(character, 3) - 10 ) / 2 ) ) ) );
 
-                let hpLevelBons = getObjects(character, 'subType', 'hit-points-per-level').forEach(function(bons) {
+                let hpLevelBons = getObjects(character, 'subType', 'hit-points-per-level').forEach((bons) => {
                     hp += total_level * bons.value;
                 });
 
@@ -921,7 +1067,7 @@
         }
     });
 
-    const getPactMagicSlots = function(level) {
+    const getPactMagicSlots = (level) => {
         switch(level){
             case 1:
                 return 1;
@@ -942,7 +1088,7 @@
         return 0;
     };
 
-    const getFeatureSpells = function(character, traitId, featureType) {
+    const getFeatureSpells = (character, traitId, featureType) => {
         let spellsArr = [];
         if(character.spells[featureType] == null) return spellsArr;
         if(character.spells[featureType].length > 0) {
@@ -957,7 +1103,7 @@
         return spellsArr;
     };
 
-    const importSpells = function(character, array) {
+    const importSpells = (character, array) => {
         // set this to whatever number of items you can process at once
         // return attributes;
         let chunk = 5;
@@ -978,7 +1124,7 @@
         doChunk();
     };
 
-    const importSpell = function(character, spell, addAttack) {
+    const importSpell = (character, spell, addAttack) => {
         let level = (spell.definition.level === 0) ? 'cantrip' : spell.definition.level.toString();
         let row = getRepeatingRowIds('spell-'+level, 'spellname', spell.definition.name)[0];
 
@@ -1033,7 +1179,7 @@
                 attributes["repeating_spell-"+level+"_"+row+"_spellhealing"] = (healing.die.fixedValue !== null) ? healing.die.fixedValue+bonus : healing.die.diceString+bonus;
                 attributes["repeating_spell-"+level+"_"+row+"_spelldmgmod"] = healing.usePrimaryStat ? 'Yes' : '0';
 
-                let bonus = '';
+                bonus = '';
                 if(getObjects(character.classes, 'name', 'Disciple of Life').length > 0) {
                     bonus = '1';
                 }
@@ -1103,12 +1249,12 @@
         return attributes;
     };
 
-    const ucFirst = function(string) {
+    const ucFirst = (string) => {
         if(string == null) return string;
         return string.charAt(0).toUpperCase() + string.slice(1);
     };
 
-    const sendConfigMenu = function(player, first) {
+    const sendConfigMenu = (player, first) => {
         let playerid = player.id;
         let prefix = (state[state_name][playerid].config.prefix !== '') ? state[state_name][playerid].config.prefix : '[NONE]';
         let prefixButton = makeButton(prefix, '!beyond --config prefix|?{Prefix}', buttonStyle);
@@ -1180,7 +1326,7 @@
         sendChat(script_name, '/w "' + player.get('displayname') + '" ' + text, null, {noarchive:true});
     };
 
-    const sendHelpMenu = function(player, first) {
+    const sendHelpMenu = (player, first) => {
         // let configButton = makeButton('Config', '!beyond --config', buttonStyle+' margin: auto; width: 90%; display: block; float: none;');
 
         let listItems = [
@@ -1204,24 +1350,24 @@
         sendChat(script_name, '/w "'+ player.get('displayname') + '" ' + text, null, {noarchive:true});
     };
 
-    const makeTitle = function(title) {
+    const makeTitle = (title) => {
         return '<h3 style="margin-bottom: 10px;">'+title+'</h3>';
     };
 
-    const makeButton = function(title, href, style) {
+    const makeButton = (title, href, style) => {
         return '<a style="'+style+'" href="'+href+'">'+title+'</a>';
     };
 
-    const makeList = function(items, listStyle, itemStyle) {
+    const makeList = (items, listStyle, itemStyle) => {
         let list = '<ul style="'+listStyle+'">';
-        items.forEach(function(item) {
+        items.forEach((item) => {
             list += '<li style="'+itemStyle+'">'+item+'</li>';
         });
         list += '</ul>';
         return list;
     };
 
-    const replaceChars = function(text) {
+    const replaceChars = (text) => {
         text = text.replace('\&rsquo\;', '\'').replace('\&mdash\;','—').replace('\ \;',' ').replace('\&hellip\;','…');
         text = text.replace('\û\;','û').replace('’', '\'').replace(' ', ' ');
         text = text.replace(/\<li[^\>]+\>/gi,'• ').replace('\<\/li\>','');
@@ -1229,11 +1375,11 @@
         return text;
     };
 
-    const getRepeatingRowIds = function(section, attribute, matchValue, index) {
+    const getRepeatingRowIds = (section, attribute, matchValue, index) => {
         let ids = [];
         if(state[state_name][beyond_caller.id].config.overwrite) {
             let matches = findObjs({ type: 'attribute', characterid: object.id })
-                .filter(function(attr) {
+                .filter((attr) => {
                     return attr.get('name').indexOf('repeating_'+section) !== -1 && attr.get('name').indexOf(attribute) !== -1 && attr.get('current') == matchValue;
                 });
             for(let i in matches) {
@@ -1249,8 +1395,8 @@
         else return ids[index] == null && index > 0 ? ids[0] : ids[index];
     }
 
-    const createRepeatingTrait = function(object, trait, options) {
-        let options = options || {};
+    const createRepeatingTrait = (object, trait, options) => {
+        options = options || {};
 
         let opts = {
             index: 0,
@@ -1270,8 +1416,8 @@
         return attributes;
     };
 
-    const createRepeatingAttack = function(object, attack, options) {
-        let options = options || {};
+    const createRepeatingAttack = (object, attack, options) => {
+        options = options || {};
 
         let opts = {
             index: 0,
@@ -1290,12 +1436,15 @@
         attackattributes["repeating_attack_"+attackrow+"_atkprofflag"] = '(@{pb})';
         attackattributes["repeating_attack_"+attackrow+"_atkmagic"] = attack.magic;
         attackattributes["repeating_attack_"+attackrow+"_atkrange"] = attack.range;
+        attackattributes["repeating_attack_"+attackrow+"_atkmod"] = attack.attack.mod == null ? '' : attack.attack.mod;
+        attackattributes["repeating_attack_"+attackrow+"_atkcritrange"] = attack.critrange == null ? '' : attack.critrange;
 
         attackattributes["repeating_attack_"+attackrow+"_dmgflag"] = '{{damage=1}} {{dmg1flag=1}}';
         attackattributes["repeating_attack_"+attackrow+"_dmgbase"] = typeof attack.damage.diceString == 'string' ? attack.damage.diceString+'' : '';
         attackattributes["repeating_attack_"+attackrow+"_dmgattr"] = (attack.damage.attribute === '0') ? '0' : '@{'+attack.damage.attribute+'_mod}';
         attackattributes["repeating_attack_"+attackrow+"_dmgtype"] = attack.damage.type;
         attackattributes["repeating_attack_"+attackrow+"_dmgcustcrit"] = attack.damage.diceString;
+        attackattributes["repeating_attack_"+attackrow+"_dmgmod"] = attack.damage.mod == null ? '' : attack.damage.mod;
 
         if(attack.damage2 != null) {
             attackattributes["repeating_attack_"+attackrow+"_dmg2flag"] = '{{damage=1}} {{dmg2flag=1}}';
@@ -1310,7 +1459,7 @@
         return attackattributes;
     };
 
-    const getTotalAbilityScore = function(character, scoreId) {
+    const getTotalAbilityScore = (character, scoreId) => {
         let index = scoreId-1;
         let base = (character.stats[index].value == null ? 10 : character.stats[index].value),
             bonus = (character.bonusStats[index].value == null ? 0 : character.bonusStats[index].value),
@@ -1332,7 +1481,7 @@
     };
 
     //return an array of objects according to key, value, or key and value matching
-    const getObjects = function(obj, key, val) {
+    const getObjects = (obj, key, val) => {
         let objects = [];
         for (let i in obj) {
             if (!obj.hasOwnProperty(i)) continue;
@@ -1353,7 +1502,7 @@
     };
 
     // Find an existing repeatable item with the same name, or generate new row ID
-    const getOrMakeRowID = function(character,repeatPrefix,name){
+    const getOrMakeRowID = (character,repeatPrefix,name) => {
         // Get list of all of the character's attributes
         let attrObjs = findObjs({ _type: "attribute", _characterid: character.get("_id") });
 
@@ -1378,7 +1527,7 @@
         return function() {
             let c = (new Date()).getTime() + 0, d = c === a;
             a = c;
-            for (let e = new Array(8), f = 7; 0 <= f; f--) {
+            for (var e = new Array(8), f = 7; 0 <= f; f--) {
                 e[f] = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".charAt(c % 64);
                 c = Math.floor(c / 64);
             }
@@ -1405,12 +1554,12 @@
         return generateUUID().replace(/_/g, "Z");
     };
 
-    const regexIndexOf = function(str, regex, startpos) {
+    const regexIndexOf = (str, regex, startpos) => {
         let indexOf = str.substring(startpos || 0).search(regex);
         return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
     };
 
-    const pre_log = function(message) {
+    const pre_log = (message) => {
         log('---------------------------------------------------------------------------------------------');
         log(message);
         log('---------------------------------------------------------------------------------------------');
@@ -1423,7 +1572,7 @@
         setDefaults();
     };
 
-    const setDefaults = function(reset) {
+    const setDefaults = (reset) => {
         const defaults = {
             overwrite: false,
             debug: false,
@@ -1449,7 +1598,7 @@
         let playerObjects = findObjs({
             _type: "player",
         });
-        playerObjects.forEach(function(player) {
+        playerObjects.forEach((player) => {
             if(!state[state_name][player.id]) {
                 state[state_name][player.id] = {};
             }
