@@ -519,7 +519,7 @@
                         attributes["repeating_inventory_"+row+"_itemname"] = item.definition.name;
                         attributes["repeating_inventory_"+row+"_equipped"] = (item.equipped) ? '1' : '0';
                         attributes["repeating_inventory_"+row+"_itemcount"] = item.quantity;
-                        attributes["repeating_inventory_"+row+"_itemweight"] = item.definition.weight / item.definition.bundleSize;
+                        attributes["repeating_inventory_"+row+"_itemweight"] = (item.definition.bundleSize != 0 ? item.definition.weight / item.definition.bundleSize : item.definition.weight);
                         attributes["repeating_inventory_"+row+"_itemcontent"] = replaceChars(item.definition.description);
                         var _itemmodifiers = 'Item Type: ' + item.definition.type;
                         if(typeof item.definition.damage === 'object' && item.definition.type !== 'Ammunition') {
