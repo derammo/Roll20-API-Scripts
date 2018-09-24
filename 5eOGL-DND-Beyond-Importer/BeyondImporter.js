@@ -233,7 +233,7 @@
                         speed += ', ' + key + ' ' + weightSpeeds.normal[key] + 'ft.';
                     }
                 }
-
+              
                 // Languages
                 if(state[state_name][beyond_caller.id].config.imports.languages) {
                     var languages = getObjects(character, 'type', 'language');
