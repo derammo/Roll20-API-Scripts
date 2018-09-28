@@ -13,6 +13,7 @@
 
 #### Modified By
 
+* Name: Matt DeKok
 * Discord: Sillvva#2532
 * Roll20: https://app.roll20.net/users/494585/sillvva
 * Github: https://github.com/sillvva/Roll20-API-Scripts
