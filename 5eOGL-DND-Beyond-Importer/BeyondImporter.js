@@ -1277,6 +1277,8 @@
         let languageGroupingButton = makeButton(state[state_name][playerid].config.languageGrouping, '!beyond --config languageGrouping|'+!state[state_name][playerid].config.languageGrouping, buttonStyle);
         let initTieBreakerButton = makeButton(state[state_name][playerid].config.initTieBreaker, '!beyond --config initTieBreaker|'+!state[state_name][playerid].config.initTieBreaker, buttonStyle);
 
+        let inPlayerJournalsButton = makeButton(player.get('displayname'), '', buttonStyle);
+        let controlledByButton = makeButton(player.get('displayname'), '', buttonStyle);
         if(playerIsGM(playerid)) {
             let players = '';
             let playerObjects = findObjs({
@@ -1288,14 +1290,10 @@
 
             let ipj = state[state_name][playerid].config.inplayerjournals == '' ? '[NONE]' : state[state_name][playerid].config.inplayerjournals;
             if(ipj != '[NONE]' && ipj != 'all') ipj = getObj('player', ipj).get('displayname');
-            let inPlayerJournalsButton = makeButton(ipj, '!beyond --config inplayerjournals|?{Player|None,[NONE]|All Players,all'+players+'}', buttonStyle);
+            inPlayerJournalsButton = makeButton(ipj, '!beyond --config inplayerjournals|?{Player|None,[NONE]|All Players,all'+players+'}', buttonStyle);
             let cb = state[state_name][playerid].config.controlledby == '' ? '[NONE]' : state[state_name][playerid].config.controlledby;
             if(cb != '[NONE]' && cb != 'all') cb = getObj('player', cb).get('displayname');
-            let controlledByButton = makeButton(cb, '!beyond --config controlledby|?{Player|None,[NONE]|All Players,all'+players+'}', buttonStyle);
-        }
-        else {
-            let inPlayerJournalsButton = makeButton(player.get('displayname'), '', buttonStyle);
-            let controlledByButton = makeButton(player.get('displayname'), '', buttonStyle);
+            controlledByButton = makeButton(cb, '!beyond --config controlledby|?{Player|None,[NONE]|All Players,all'+players+'}', buttonStyle);
         }
 
         let sheetListItems = [

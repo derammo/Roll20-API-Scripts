@@ -17,8 +17,8 @@
       <file leaf-file-name="BeyondImporter.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/5eOGL-DND-Beyond-Importer/BeyondImporter.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="164">
-              <caret line="916" column="43" lean-forward="false" selection-start-line="916" selection-start-column="43" selection-end-line="916" selection-end-column="43" />
+            <state relative-caret-position="51">
+              <caret line="1280" column="12" lean-forward="true" selection-start-line="1280" selection-start-column="12" selection-end-line="1280" selection-end-column="12" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
                 <element signature="e#11581#13300#0" expanded="false" />
@@ -37,21 +37,21 @@
                 <element signature="e#47085#47983#0" expanded="false" />
                 <element signature="e#48159#48868#0" expanded="false" />
                 <element signature="e#49096#49704#0" expanded="false" />
-                <marker date="1538012521290" expanded="true" signature="70772:70801" ph="..." />
-                <marker date="1538012521290" expanded="true" signature="70860:70890" ph="..." />
-                <marker date="1538012521290" expanded="true" signature="71062:71091" ph="..." />
-                <marker date="1538012521290" expanded="true" signature="71150:71179" ph="..." />
-                <marker date="1538012521290" expanded="true" signature="71238:71267" ph="..." />
-                <marker date="1538012521290" expanded="true" signature="73370:73399" ph="..." />
-                <marker date="1538012521290" expanded="true" signature="73479:73508" ph="..." />
-                <marker date="1538012521290" expanded="true" signature="73592:73621" ph="..." />
-                <marker date="1538012521290" expanded="true" signature="73701:73730" ph="..." />
-                <marker date="1538012521290" expanded="true" signature="74440:74451" ph="..." />
-                <marker date="1538012521290" expanded="true" signature="75393:75436" ph="..." />
-                <marker date="1538012521290" expanded="true" signature="75510:75553" ph="..." />
-                <marker date="1538012521290" expanded="true" signature="75652:75695" ph="..." />
-                <marker date="1538012521290" expanded="true" signature="76342:76368" ph="..." />
-                <marker date="1538012521290" expanded="true" signature="76858:76878" ph="..." />
+                <marker date="1538100923561" expanded="true" signature="70772:70801" ph="..." />
+                <marker date="1538100923561" expanded="true" signature="70860:70890" ph="..." />
+                <marker date="1538100923561" expanded="true" signature="71062:71091" ph="..." />
+                <marker date="1538100923561" expanded="true" signature="71150:71179" ph="..." />
+                <marker date="1538100923561" expanded="true" signature="71238:71267" ph="..." />
+                <marker date="1538100923561" expanded="true" signature="73329:73358" ph="..." />
+                <marker date="1538100923561" expanded="true" signature="73438:73467" ph="..." />
+                <marker date="1538100923561" expanded="true" signature="73551:73580" ph="..." />
+                <marker date="1538100923561" expanded="true" signature="73660:73689" ph="..." />
+                <marker date="1538100923561" expanded="true" signature="74399:74410" ph="..." />
+                <marker date="1538100923561" expanded="true" signature="75352:75395" ph="..." />
+                <marker date="1538100923561" expanded="true" signature="75469:75512" ph="..." />
+                <marker date="1538100923561" expanded="true" signature="75611:75654" ph="..." />
+                <marker date="1538100923561" expanded="true" signature="76301:76327" ph="..." />
+                <marker date="1538100923561" expanded="true" signature="76817:76837" ph="..." />
               </folding>
             </state>
           </provider>
@@ -276,7 +276,7 @@
       <option name="presentableId" value="Default" />
       <updated>1530795253035</updated>
       <workItem from="1530795255237" duration="2066000" />
-      <workItem from="1537676233341" duration="23811000" />
+      <workItem from="1537676233341" duration="25924000" />
     </task>
     <task id="LOCAL-00001" summary="Minor code revision, no functional change">
       <created>1537676694987</created>
@@ -362,11 +362,18 @@
       <option name="project" value="LOCAL" />
       <updated>1538008654015</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="- Fixed missing skill in variable&#10;- Updated attack range&#10;- Added:&#10;--- Bonus saving throw proficiencies&#10;--- Saving Throw Bonuses&#10;--- Champion's critical range&#10;--- Defense Fighting Style&#10;--- Great Weapon Fighting Style&#10;--- Fighting Style&#10;--- Dueling Fighting Style&#10;--- Two-Weapon Fighting Style&#10;--- Initiative advantage/disadvantage">
+      <created>1538013113504</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1538013113504</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="25877000" />
+    <option name="totallyTimeSpent" value="27990000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1912" y="-8" width="1936" height="1096" extended-state="6" />
@@ -375,11 +382,11 @@
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16364606" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.33015874" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32910052" sideWeight="0.5021322" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32910052" sideWeight="0.4978678" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -394,6 +401,32 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
+              <option name="COLUMN_ORDER">
+                <list>
+                  <option value="0" />
+                  <option value="1" />
+                  <option value="2" />
+                  <option value="3" />
+                </list>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
@@ -410,7 +443,8 @@
     <MESSAGE value="- Fixed missing skill in variable&#10;- Updated attack range&#10;- Added bonus saving throw proficiencies&#10;- Added Champion's critical range support&#10;- Added Defense Fighting Style support&#10;- Added Great Weapon Fighting Style support&#10;- Added Archery Fighting Style support&#10;- Added Dueling Fighting Style support" />
     <MESSAGE value="- Fixed missing skill in variable&#10;- Updated attack range&#10;- Added bonus saving throw proficiencies&#10;- Added Champion's critical range support&#10;- Added Defense Fighting Style support&#10;- Added Great Weapon Fighting Style support&#10;- Added Archery Fighting Style support&#10;- Added Dueling Fighting Style support&#10;- Added Two-Weapon Fighting Style support" />
     <MESSAGE value="- Fixed missing skill in variable&#10;- Updated attack range&#10;- Added bonus saving throw proficiencies&#10;- Added Champion's critical range support&#10;- Added Defense Fighting Style support&#10;- Added Great Weapon Fighting Style support&#10;- Added Archery Fighting Style support&#10;- Added Dueling Fighting Style support&#10;- Added Two-Weapon Fighting Style support&#10;- Added initiative advantage/disadvantage support" />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed missing skill in variable&#10;- Updated attack range&#10;- Added bonus saving throw proficiencies&#10;- Added Champion's critical range support&#10;- Added Defense Fighting Style support&#10;- Added Great Weapon Fighting Style support&#10;- Added Archery Fighting Style support&#10;- Added Dueling Fighting Style support&#10;- Added Two-Weapon Fighting Style support&#10;- Added initiative advantage/disadvantage support" />
+    <MESSAGE value="- Fixed missing skill in variable&#10;- Updated attack range&#10;- Added:&#10;--- Bonus saving throw proficiencies&#10;--- Saving Throw Bonuses&#10;--- Champion's critical range&#10;--- Defense Fighting Style&#10;--- Great Weapon Fighting Style&#10;--- Fighting Style&#10;--- Dueling Fighting Style&#10;--- Two-Weapon Fighting Style&#10;--- Initiative advantage/disadvantage" />
+    <option name="LAST_COMMIT_MESSAGE" value="- Fixed missing skill in variable&#10;- Updated attack range&#10;- Added:&#10;--- Bonus saving throw proficiencies&#10;--- Saving Throw Bonuses&#10;--- Champion's critical range&#10;--- Defense Fighting Style&#10;--- Great Weapon Fighting Style&#10;--- Fighting Style&#10;--- Dueling Fighting Style&#10;--- Two-Weapon Fighting Style&#10;--- Initiative advantage/disadvantage" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -460,21 +494,21 @@
             <element signature="e#47085#47983#0" expanded="false" />
             <element signature="e#48159#48868#0" expanded="false" />
             <element signature="e#49096#49704#0" expanded="false" />
-            <marker date="1538012521290" expanded="true" signature="70772:70801" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="70860:70890" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="71062:71091" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="71150:71179" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="71238:71267" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="73370:73399" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="73479:73508" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="73592:73621" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="73701:73730" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="74440:74451" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="75393:75436" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="75510:75553" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="75652:75695" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="76342:76368" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="76858:76878" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="70772:70801" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="70860:70890" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="71062:71091" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="71150:71179" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="71238:71267" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="73329:73358" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="73438:73467" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="73551:73580" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="73660:73689" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="74399:74410" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="75352:75395" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="75469:75512" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="75611:75654" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="76301:76327" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="76817:76837" ph="..." />
           </folding>
         </state>
       </provider>
@@ -508,8 +542,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/5eOGL-DND-Beyond-Importer/BeyondImporter.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="164">
-          <caret line="916" column="43" lean-forward="false" selection-start-line="916" selection-start-column="43" selection-end-line="916" selection-end-column="43" />
+        <state relative-caret-position="51">
+          <caret line="1280" column="12" lean-forward="true" selection-start-line="1280" selection-start-column="12" selection-end-line="1280" selection-end-column="12" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
             <element signature="e#11581#13300#0" expanded="false" />
@@ -528,21 +562,21 @@
             <element signature="e#47085#47983#0" expanded="false" />
             <element signature="e#48159#48868#0" expanded="false" />
             <element signature="e#49096#49704#0" expanded="false" />
-            <marker date="1538012521290" expanded="true" signature="70772:70801" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="70860:70890" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="71062:71091" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="71150:71179" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="71238:71267" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="73370:73399" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="73479:73508" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="73592:73621" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="73701:73730" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="74440:74451" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="75393:75436" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="75510:75553" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="75652:75695" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="76342:76368" ph="..." />
-            <marker date="1538012521290" expanded="true" signature="76858:76878" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="70772:70801" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="70860:70890" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="71062:71091" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="71150:71179" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="71238:71267" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="73329:73358" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="73438:73467" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="73551:73580" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="73660:73689" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="74399:74410" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="75352:75395" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="75469:75512" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="75611:75654" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="76301:76327" ph="..." />
+            <marker date="1538100923561" expanded="true" signature="76817:76837" ph="..." />
           </folding>
         </state>
       </provider>
