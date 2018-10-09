@@ -143,7 +143,7 @@
                 if(!object) {
                     // Create character object
                     object = createObj("character", {
-                        name: character.name + state[state_name][beyond_caller.id].config.prefix,
+                        name: state[state_name][beyond_caller.id].config.prefix + character.name + state[state_name][beyond_caller.id].config.suffix,
                         inplayerjournals: playerIsGM(msg.playerid) ? state[state_name][beyond_caller.id].config.inplayerjournals : msg.playerid,
                         controlledby: playerIsGM(msg.playerid) ? state[state_name][beyond_caller.id].config.controlledby : msg.playerid
                     });
