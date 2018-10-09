@@ -799,17 +799,6 @@
                     }
                 });
 
-                attributes = {};
-                abilities.forEach((ability) => {
-                    let abl = _ABILITY[ability];
-                    let saves = getObjects(character, 'subType', abl+'-saving-throws');
-                    saves.forEach((save) => {
-                        if(save.type == 'proficiency') {
-                            attributes[abl + '_save_prof'] = "(@{pb})";
-                        }
-                    });
-                });
-                Object.assign(all_attributes, attributes);
 
                 let hpModifiers = getObjects(character.modifiers.class, 'type', 'half-proficiency');
                 let hprModifiers = getObjects(character.modifiers.class, 'type', 'half-proficiency-round-up');
@@ -906,7 +895,8 @@
                 if(initadv && !initdis) init_style = '{@{d20},@{d20}}kh1';
                 if(!initadv && initdis) init_style = '{@{d20},@{d20}}kl1';
 
-                // Saving Throw Bonuses
+                // Saving Throw Bonuses and proficiencies
+                let save_proficiency_attributes = {}
                 let stBonuses = getObjects(character.modifiers, 'subType', 'saving-throws', ['item']);
                 let stBonTotals = [0,0,0,0,0,0,0];
                 stBonuses.forEach((bonus) => {
@@ -927,6 +917,9 @@
                         }
                         if(bonus.value != null) {
                             stBonTotals[parseInt(i)] += bonus.value;
+                        }
+                        if(bonus.type == 'proficiency') {
+                            save_proficiency_attributes[abl + '_save_prof'] = "(@{pb})";
                         }
                     });
                 }
@@ -1029,6 +1022,7 @@
 
                 Object.assign(all_attributes, other_attributes);
                 // Object.assign(all_attributes, bonus_attributes);
+                Object.assign(all_attributes, save_proficiency_attributes);
 
                 setAttrs(object.id, all_attributes);
 
