@@ -907,7 +907,7 @@
                 if(!initadv && initdis) init_style = '{@{d20},@{d20}}kl1';
 
                 // Saving Throw Bonuses
-                let stBonuses = getObjects(character.modifiers, 'subType', 'saving-throws');
+                let stBonuses = getObjects(character.modifiers, 'subType', 'saving-throws', ['item']);
                 let stBonTotals = [0,0,0,0,0,0,0];
                 stBonuses.forEach((bonus) => {
                     if(bonus.statId != null) {
@@ -919,7 +919,7 @@
                 });
                 for(let i in _ABILITIES) {
                     let abl = _ABILITY[_ABILITIES[i]];
-                    let stBonuses = getObjects(character.modifiers, 'subType', abl+'-saving-throws');
+                    let stBonuses = getObjects(character.modifiers, 'subType', abl+'-saving-throws', ['item']);
                     let stBonTotals = [0,0,0,0,0,0,0];
                     stBonuses.forEach((bonus) => {
                         if(bonus.statId != null) {
@@ -1478,12 +1478,16 @@
         return total;
     };
 
-    //return an array of objects according to key, value, or key and value matching
-    const getObjects = (obj, key, val) => {
+    //return an array of objects according to key, value, or key and value matching, optionally ignoring objects in array of names
+    const getObjects = (obj, key, val, except) => {
+        except = except || [];
         let objects = [];
         for (let i in obj) {
             if (!obj.hasOwnProperty(i)) continue;
             if (typeof obj[i] == 'object') {
+                if (except.indexOf(i) != -1) {
+                    continue;
+                }
                 objects = objects.concat(getObjects(obj[i], key, val));
             } else
             //if key matches and value matches or if key matches and value is not passed (eliminating the case where key matches but passed value does not)
