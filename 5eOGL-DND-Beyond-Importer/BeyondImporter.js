@@ -956,14 +956,14 @@
                     'alignment': character.alignmentId == null ? '' : alignments[character.alignmentId],
 
                     // Bio Info
-                    // 'age': character.age ? character.age : '',
-                    // 'size': character.size,
-                    // 'height': character.height ? character.height : '',
-                    // 'weight': character.weight ? character.weight : '',
-                    // 'eyes': character.eyes ? character.eyes : '',
-                    // 'hair': character.hair ? character.hair : '',
-                    // 'skin': character.skin ? character.skin : '',
-                    // 'character_appearance': character.traits.appearance,
+                    'age': (character.age || ''),
+                    'size': (character.size || ''),
+                    'height': (character.height || ''),
+                    'weight': (character.weight || ''),
+                    'eyes': (character.eyes || ''),
+                    'hair': (character.hair || ''),
+                    'skin': (character.skin || ''),
+                    'character_appearance': (character.traits.appearance || ''),
 
                     // Class(es)
                     'class': character.classes[0].definition.name,
