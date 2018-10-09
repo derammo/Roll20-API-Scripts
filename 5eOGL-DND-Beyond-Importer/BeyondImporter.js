@@ -1052,10 +1052,10 @@
                     hpAttr.set('max', hp);
                 }
 
-                if(class_spells.length > 15 && state[state_name][beyond_caller.id].config.imports.class_spells) {
-                    sendChat(script_name, '<div style="'+style+'">Import of <b>' + character.name + '</b> is almost ready.<br><p>There are some more spells than expected, they will be imported over time.</p></div>', null, {noarchive:true});
+                if(class_spells.length > 0 && state[state_name][beyond_caller.id].config.imports.class_spells) {
+                    sendChat(script_name, '<div style="'+style+'">Import of <b>' + character.name + '</b> is almost ready.<br><p>Class spells are being imported over time.</p></div>', null, {noarchive:true});
                 } else {
-                    sendChat(script_name, '<div style="'+style+'">Import of <b>' + character.name + '</b> is ready.</div>', null, {noarchive:true});
+                    reportReady(character)
                 }
             }
         }
@@ -1082,6 +1082,13 @@
         return 0;
     };
 
+    const reportReady = (character) => {
+        // TODO this is nonsense.  we aren't actually done importing, because notifications in the character sheet are firing for quite a while
+        // after we finish changing things (especially on first import) and we have no way (?) to wait for it to be done.   These are not sheet workers
+        // on which we can wait.
+        sendChat(script_name, '<div style="'+style+'">Import of <b>' + character.name + '</b> is ready at https://journal.roll20.net/character/' + object.id +'</div>', null, {noarchive:true});
+    }
+    
     const getFeatureSpells = (character, traitId, featureType) => {
         let spellsArr = [];
         if(character.spells[featureType] == null) return spellsArr;
@@ -1113,6 +1120,9 @@
             if (index < array.length) {
                 // set Timeout for async iteration
                 onSheetWorkerCompleted(doChunk);
+            } else {
+                // truly done now
+                reportReady(character);
             }
         }
         doChunk();
