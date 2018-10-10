@@ -525,6 +525,21 @@
                 // Import Character Inventory
                 let hasArmor = false;
                 if(state[state_name][beyond_caller.id].config.imports.inventory) {
+                    // accumulate unique fighting styles selected
+                    let fightingStylesSelected = new Set()
+                    let fightingStyles = getObjects(character.classes, 'name', 'Fighting Style');
+                    fightingStyles.forEach((fS) => {
+                        let fsOpts = getObjects(character.choices, 'componentId', fS.id);
+                        fsOpts.forEach((fsOpt) => {
+                            if(fsOpt.optionValue != null) {
+                                let selOpts = getObjects(fsOpt.options, 'id', fsOpt.optionValue);
+                                selOpts.forEach((selOpt) => {
+                                    fightingStylesSelected.add(selOpt.label)
+                                });
+                            }
+                        });
+                    });
+
                     const inventory = character.inventory;
                     let prevAdded = [];
                     if(inventory != null) inventory.forEach((item, i) => {
@@ -595,32 +610,27 @@
                                 }
                             });
 
-                            let fightingStyles = getObjects(character.classes, 'name', 'Fighting Style');
                             let gwf = false;
                             let atkmod = 0;
                             let dmgmod = 0;
                             let hasTWFS = false;
-                            fightingStyles.forEach((fS) => {
-                                let fsOpts = getObjects(character.choices, 'componentId', fS.id);
-                                fsOpts.forEach((fsOpt) => {
-                                    if(fsOpt.optionValue != null) {
-                                        let selOpts = getObjects(fsOpt.options, 'id', fsOpt.optionValue);
-                                        selOpts.forEach((selOpt) => {
-                                            if(selOpt.label == 'Great Weapon Fighting' && twohanded) {
-                                                gwf = true;
-                                            }
-                                            if(selOpt.label == 'Archery' && ranged) {
-                                                atkmod += 2;
-                                            }
-                                            if(selOpt.label == 'Dueling' && !hasOffhand) {
-                                                dmgmod += 2;
-                                            }
-                                            if(selOpt.label == 'Two-Weapon Fighting') {
-                                                hasTWFS = true;
-                                            }
-                                        });
-                                    }
-                                });
+
+                            // process each fighting style only once 
+                            fightingStylesSelected.forEach((fightingStyle) => {
+                                if(fightingStyle == 'Great Weapon Fighting' && twohanded) {
+                                    gwf = true;
+                                }
+                                if(fightingStyle == 'Archery' && ranged) {
+                                    atkmod += 2;
+                                }
+                                if(fightingStyle== 'Dueling' && !(hasOffhand || ranged || twohanded)) {
+                                    log('applying Dueling +2 to ' + item.definition.name)
+                                    dmgmod += 2;
+                                    log('damage mod now ' + dmgmod)
+                                }
+                                if(fightingStyle == 'Two-Weapon Fighting') {
+                                    hasTWFS = true;
+                                }
                             });
 
                             let dmgattr = _ABILITY[_ABILITIES[item.definition.attackType]];
