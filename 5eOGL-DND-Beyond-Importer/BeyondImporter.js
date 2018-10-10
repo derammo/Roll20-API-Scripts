@@ -1168,9 +1168,9 @@
     };
 
     const reportReady = (character) => {
-        // TODO this is nonsense.  we aren't actually done importing, because notifications in the character sheet are firing for quite a while
-        // after we finish changing things (especially on first import) and we have no way (?) to wait for it to be done.   These are not sheet workers
-        // on which we can wait.
+        // the sheet should now be stable, since we marked it as already upgraded and waited for all major reconfiguration triggers
+        // TODO: as the 5e OGL version number increases, we need to make sure we don't trigger reconfigurations by 
+        // creating an up to date sheet and marking it as latest version
         sendChat(script_name, '<div style="'+style+'">Import of <b>' + character.name + '</b> is ready at https://journal.roll20.net/character/' + object.id +'</div>', null, {noarchive:true});
     }
     
